@@ -9,41 +9,6 @@ from utils.util import (falcon_admin_required, max_body,
                         webap_login_cache_required)
 
 
-class acadNewsByPage:
-
-    auth = {
-        'exempt_methods': ['GET']
-    }
-
-    def on_get(self, req, resp):
-
-        if req.get_param('page') == None:
-            raise falcon.HTTPBadRequest(
-                description='Get parameter error, loss page.')
-        try:
-            int(req.get_param('page'))
-            if int(req.get_param('page')) < 1:
-                raise falcon.HTTPBadRequest(
-                    description='Get parameter error, loss page.')
-        except:
-            raise falcon.HTTPBadRequest(
-                ddescription='Get parameter error, something erorr.')
-
-        acad_news_data = sac_cache.acad_cache(page=int(req.get_param('page')))
-
-        if isinstance(acad_news_data, str):
-            resp.body = acad_news_data
-            resp.media = falcon.MEDIA_JSON
-            resp.status = falcon.HTTP_200
-            return True
-        elif acad_news_data == error_code.ACAD_TIMEOUT:
-            resp.status = falcon.HTTP_503
-            return True
-
-        raise falcon.HTTPInternalServerError(
-            description='something error ?')
-
-
 class Announcements:
 
     auth = {
