@@ -8,6 +8,7 @@ import redis
 from utils import time_tool
 from utils.config import REDIS_URL
 from utils.config import ANNOUNCEMENT_REQUIRED_FIELD
+from utils.config import ANNOUNCEMENT_FIELD
 import logging
 
 
@@ -96,6 +97,7 @@ class AnnouncementService:
             [int]: Success, return announcement id.
         """
 
+        # check required field
         compare_list = [
             True for x in kwargs.keys() if x in ANNOUNCEMENT_REQUIRED_FIELD]
 
@@ -115,30 +117,31 @@ class AnnouncementService:
                 announcement_id = id_
                 break
 
-        announcement_data = {
-            "title": kwargs.get('title', ""),
-            "id": announcement_id,
-            "publishedAt": datetime.datetime.utcnow().isoformat(timespec="seconds")+"Z",
-            "weight": int(kwargs.get('weight', 0)),
-            "imgUrl": kwargs.get('imgUrl', None),
-            "url": kwargs.get('url', None),
-            "description": kwargs.get('description', None),
-            'tag': kwargs.get('tag', [])
-        }
-        if kwargs.get('location', False):
-            location = kwargs.get('location', {})
-            if isinstance(location.get('title', False), str) and \
-                    isinstance(location.get('lat', False), int) and \
-                    isinstance(location.get('lng', False), int):
-                announcement_data['location'] = {
-                    'title': location.get('title', None),
-                    'lng': location.get('lng', None),
-                    'lat': location.get('lat', None)
-                }
-        expire_time_seconds = kwargs.get('expireTime', None)
+        announcement_data = {}
+        for key, value in ANNOUNCEMENT_FIELD.items():
+            if isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
+                announcement_data[key] = kwargs.get(key, None)
+                continue
+            if not isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
+                if kwargs.get(key, None) is not None:
+                    logging.info("Add Announcements field type error :{key}")
+                announcement_data[key] = value['default']
+
+        announcement_data['publishedAt'] = datetime.datetime.utcnow(
+        ).isoformat(timespec="seconds")+"Z"
+        announcement_data['id'] = announcement_id
+
+        expire_time_seconds = None
         if kwargs.get('expireTime', False):
             utc = time_tool.time_format(kwargs.get('expireTime', False))
-            expire_time_seconds = (utc-datetime.datetime.utcnow()).seconds
+            expire_time_seconds = int(
+                (utc-datetime.datetime.utcnow()).total_seconds())
+            if expire_time_seconds < 0:
+                expire_time_seconds = None
+            else:
+                announcement_data["expireTime"] = time_tool.time_format(kwargs.get(
+                    'expireTime', False)).isoformat(timespec="seconds")+"Z"
+
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
 
         self.redis_announcement.set(name=announcement_name.format(announcement_id=announcement_id,
