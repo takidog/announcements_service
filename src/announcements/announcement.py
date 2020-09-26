@@ -7,6 +7,7 @@ import redis
 
 from utils import time_tool
 from utils.config import REDIS_URL
+from utils.config import ANNOUNCEMENT_REQUIRED_FIELD
 
 
 class AnnouncementService:
@@ -77,6 +78,7 @@ class AnnouncementService:
 
     def add_announcement(self, **kwargs):
         """Add announcement to redis.
+        set required field list on config.py
         Kwargs:
             title   [str]:     Required.
             imgUrl [str]:     Optional.
@@ -92,8 +94,11 @@ class AnnouncementService:
             [bool]: False
             [int]: Success, return announcement id.
         """
-        title = kwargs.get('title', False)
-        if not title:
+
+        compare_list = [
+            True for x in kwargs.keys() if x in ANNOUNCEMENT_REQUIRED_FIELD]
+
+        if not any(compare_list) or len(compare_list) != len(ANNOUNCEMENT_REQUIRED_FIELD):
             return False
 
         announcement_name = "announcement_{announcement_id}_{tag}"
@@ -110,7 +115,7 @@ class AnnouncementService:
                 break
 
         announcement_data = {
-            "title": title,
+            "title": kwargs.get('title', ""),
             "id": announcement_id,
             "publishedAt": datetime.datetime.utcnow().isoformat(timespec="seconds")+"Z",
             "weight": int(kwargs.get('weight', 0)),
