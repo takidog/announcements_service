@@ -27,7 +27,7 @@ class AnnouncementService:
 
     def _mix_index_id(self, announcement_data: list) -> list:
         """Mix next id and last id into announcement.
-        
+
         Args:
             announcement_data ([list]): announcements after sort.
         Returns:
@@ -275,7 +275,7 @@ class AnnouncementService:
                 result[tag] += 1
         return result
 
-    def get_announcement_by_tags(self, tags=[], announcements=None) -> list:
+    def get_announcement_by_tags(self, tags=None, announcements=None) -> list:
         """search by tag.
 
         Args:
@@ -287,7 +287,7 @@ class AnnouncementService:
         """
         if announcements is None:
             announcements = self._get_all_announcement()
-        if tags == []:
+        if tags is None or not isinstance(tags, list):
             return announcements
         result = []
         if len(tags) == 1:
