@@ -289,6 +289,7 @@ class AnnouncementService:
             announcements = self._get_all_announcement()
         if tags is None or not isinstance(tags, list):
             return announcements
+        tags = list(set(tags))
         result = []
         if len(tags) == 1:
             for announcement in announcements:
