@@ -5,7 +5,7 @@ import json
 import falcon
 import redis
 
-from utils.time_tool import time_format
+from utils import time_tool
 from utils.config import REDIS_URL
 
 
@@ -131,7 +131,7 @@ class AnnouncementService:
                 }
         expire_time_seconds = kwargs.get('expireTime', None)
         if kwargs.get('expireTime', False):
-            utc = time_format(kwargs.get('expireTime', False))
+            utc = time_tool.time_format(kwargs.get('expireTime', False))
             expire_time_seconds = (utc-datetime.datetime.utcnow()).seconds
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
 
@@ -183,7 +183,7 @@ class AnnouncementService:
         expire_time_seconds = kwargs.get(
             'expireTime', origin_announcement.get('expireTime', None))
         if kwargs.get('expireTime', origin_announcement.get('expireTime', False)):
-            utc = time_format(kwargs.get(
+            utc = time_tool.time_format(kwargs.get(
                 'expireTime', origin_announcement.get('expireTime', False)))
             expire_time_seconds = (utc-datetime.datetime.utcnow()).seconds
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
