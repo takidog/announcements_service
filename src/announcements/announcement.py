@@ -245,7 +245,7 @@ class AnnouncementService:
                 msg="Announcement conflict, have same id on database")
             if raise_same_id_conflict:
                 raise falcon.HTTPServiceUnavailable(
-                    title="announcement same id conflict")
+                    title="announcement have same id conflict")
 
         return announcement_name_search
 
