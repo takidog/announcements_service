@@ -209,7 +209,7 @@ class AnnouncementService:
             raise falcon.HTTPMissingParam("announcement id")
         try:
             announcement_name_search = self._get_announcement_key_name_by_id(
-                announcement_id, raise_same_id_conflict=not force_delete)
+                announcement_id, raise_error=not force_delete)
         except falcon.HTTPServiceUnavailable as e:
             falcon.falcon.HTTPServiceUnavailable(
                 title=e.title, description="Add force delete to dismiss this error, and delete same id announcements.")
@@ -219,7 +219,7 @@ class AnnouncementService:
 
         return True
 
-    def _get_announcement_key_name_by_id(self, announcement_id: int, raise_same_id_conflict=False) -> list:
+    def _get_announcement_key_name_by_id(self, announcement_id: int, raise_error=False) -> list:
         """Get announcement key name from redis.
 
         Args:
@@ -235,13 +235,12 @@ class AnnouncementService:
         """
         announcement_name_search = self.redis_announcement.scan(
             match=f"announcement_{announcement_id}_*")[1]
-
-        if len(announcement_name_search) < 1 and raise_same_id_conflict:
+        if len(announcement_name_search) < 1 and raise_error:
             raise falcon.HTTPNotFound()
         if len(announcement_name_search) > 1:
             logging.warning(
                 msg="Announcement conflict, have same id on database")
-            if raise_same_id_conflict:
+            if raise_error:
                 raise falcon.HTTPServiceUnavailable(
                     title="announcement have same id conflict")
 
