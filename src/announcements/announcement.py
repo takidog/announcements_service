@@ -25,48 +25,29 @@ class AnnouncementService:
         self.redis_announcement = redis.StrictRedis.from_url(
             url=REDIS_URL, db=8, charset="utf-8", decode_responses=True)
 
-    def _mix_index_id(self, announcement_id: int):
+    def _mix_index_id(self, announcement_data: list) -> list:
         """Mix next id and last id into announcement.
-
+        
         Args:
-            announcement_id ([int]): announcement id
+            announcement_data ([list]): announcements after sort.
         Returns:
             [dict]: news data
             [None]: not found announcement.
         """
+        if len(announcement_data) == 1:
+            announcement_data[0]['nextId'] = None
+            announcement_data[0]['lastId'] = None
+            return announcement_data
+        announcement_data[0]['lastId'] = None
+        announcement_data[0]['nextId'] = announcement_data[1]['id']
+        for index in range(1, len(announcement_data)-1):
+            announcement_data[index]['nextId'] = announcement_data[index+1]['id']
+            announcement_data[index]['lastId'] = announcement_data[index-1]['id']
+        announcement_data[len(announcement_data)-1]['lastId'] = announcement_data[len(
+            announcement_data)-1]['id']
+        announcement_data[len(announcement_data)-1]['nextId'] = None
 
-        announcements = self._get_all_announcement()
-        if len(announcements) < 1:
-            return None
-        temp_announcements_index = -1
-        announcement_next = {}
-        announcement_last = {}
-
-        for index, value in enumerate(announcements):
-            if value['id'] == announcement_id:
-                temp_announcements_index = index
-                try:
-                    announcement_next = announcements[index+1]
-                except IndexError:
-                    announcement_next = {}
-                try:
-                    announcement_last = announcements[index-1]
-                    if index-1 < 0:
-                        announcement_last = {}
-                except IndexError:
-                    announcement_last = {}
-
-        if temp_announcements_index < 0:
-            # not found announcement
-            return None
-
-        # mix announcement next id and announcement last id to dict
-        announcements[temp_announcements_index]['nextId'] = announcement_next.get(
-            'id', None)
-        announcements[temp_announcements_index]['lastId'] = announcement_last.get(
-            'id', None)
-
-        return announcements[temp_announcements_index]
+        return announcement_data
 
     def _get_all_announcement(self) -> list:
         # private
@@ -74,9 +55,12 @@ class AnnouncementService:
                                for i in self.redis_announcement.scan_iter()], key=lambda k: k['id'])
         return announcement
 
-    def get_all_announcement(self) -> list:
+    def get_all_announcement(self, raw_announcements=None) -> list:
         # public
-        return [self._mix_index_id(announcement_id=i['id']) for i in self._get_all_announcement()]
+        if raw_announcements is None:
+            raw_announcements = self._get_all_announcement()
+
+        return self._mix_index_id(raw_announcements)
 
     def add_announcement(self, **kwargs) -> bool:
         """Add announcement to redis.
