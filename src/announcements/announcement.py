@@ -221,6 +221,33 @@ class AnnouncementService:
 
         return True
 
+    def _get_announcement_key_name_by_id(self, announcement_id: int, raise_same_id_conflict=False) -> list:
+        """Get announcement key name from redis.
+
+        Args:
+            announcement_id (int): announcement id.
+            raise_same_id_conflict (bool, optional): raise error by falcon. Defaults to False.
+
+        Raises:
+            falcon.HTTPNotFound: Not found announcement by id.
+            falcon.HTTPServiceUnavailable: Found same id on database.
+
+        Returns:
+            list: key name list
+        """
+        announcement_name_search = self.redis_announcement.scan(
+            match=f"announcement_{announcement_id}_*")[1]
+
+        if len(announcement_name_search) < 1 and raise_same_id_conflict:
+            raise falcon.HTTPNotFound()
+        if len(announcement_name_search) > 1:
+            logging.warning(
+                msg="Announcement conflict, have same id on database")
+            if raise_same_id_conflict:
+                raise falcon.HTTPServiceUnavailable(
+                    title="announcement same id conflict")
+
+        return announcement_name_search
 
 def get_all_by_tag(tag_list):
     # TODO Tag function need change better search method.
