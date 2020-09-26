@@ -207,15 +207,12 @@ class AnnouncementService:
         """
         if announcement_id is None:
             raise falcon.HTTPMissingParam("announcement id")
-
-        announcement_name_search = self.redis_announcement.scan(
-            match=f"announcement_{announcement_id}_*")[1]
-
-        if len(announcement_name_search) < 1:
-            raise falcon.HTTPNotFound()
-        if len(announcement_name_search) > 1 and force_delete is False:
-            raise falcon.HTTPServiceUnavailable(
-                title="announcement id conflict", description="this id have conflict, add force delete parameter")
+        try:
+            announcement_name_search = self._get_announcement_key_name_by_id(
+                announcement_id, raise_same_id_conflict=not force_delete)
+        except falcon.HTTPServiceUnavailable as e:
+            falcon.falcon.HTTPServiceUnavailable(
+                title=e.title, description="Add force delete to dismiss this error, and delete same id announcements.")
 
         for name in announcement_name_search:
             self.redis_announcement.delete(name)
