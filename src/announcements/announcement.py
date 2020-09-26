@@ -10,6 +10,12 @@ from utils.config import REDIS_URL
 
 
 class Announcements_service:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
         self.redis_announcement = redis.StrictRedis.from_url(
