@@ -172,29 +172,41 @@ class AnnouncementService:
         """
         if announcement_id == None:
             raise falcon.HTTPMissingParam("announcement_id")
-
-        announcement_name = f"announcement_{announcement_id}"
-        if not self.redis_announcement.exists(announcement_name):
-            raise falcon.HTTPNotFound(description="Not found announcement id.")
+        try:
+            announcement_name = self._get_announcement_key_name_by_id(
+                announcement_id)[0]
+        except IndexError:
+            raise falcon.HTTPNotFound()
 
         origin_announcement = json.loads(
             self.redis_announcement.get(announcement_name))
 
-        announcement_data = {
-            "title": kwargs.get('title', origin_announcement.get('title', "")),
-            "id": int(announcement_id),
-            "publishedAt": datetime.datetime.utcnow().isoformat(timespec="seconds")+"Z",
-            "weight": int(kwargs.get('weight', int(origin_announcement.get('weight', 0)))),
-            "imgUrl": kwargs.get('img_url', origin_announcement.get('imgUrl', None)),
-            "url": kwargs.get('url', origin_announcement.get('url', None)),
-            "description": kwargs.get('description', origin_announcement.get('description', None))
-        }
-        expire_time_seconds = kwargs.get(
-            'expireTime', origin_announcement.get('expireTime', None))
-        if kwargs.get('expireTime', origin_announcement.get('expireTime', False)):
-            utc = time_tool.time_format(kwargs.get(
-                'expireTime', origin_announcement.get('expireTime', False)))
-            expire_time_seconds = (utc-datetime.datetime.utcnow()).seconds
+        announcement_data = {}
+        for key, value in ANNOUNCEMENT_FIELD.items():
+            if isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
+                announcement_data[key] = kwargs.get(key, None)
+                continue
+            if not isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
+                if kwargs.get(key, None) is not None:
+                    logging.info("Add Announcements field type error :{key}")
+                announcement_data[key] = origin_announcement.get(
+                    key, value['default'])
+
+        announcement_data['publishedAt'] = datetime.datetime.utcnow(
+        ).isoformat(timespec="seconds")+"Z"
+        announcement_data['id'] = announcement_id
+
+        expire_time_seconds = None
+        if kwargs.get('expireTime', False):
+            utc = time_tool.time_format(kwargs.get('expireTime', False))
+            expire_time_seconds = int(
+                (utc-datetime.datetime.utcnow()).total_seconds())
+            if expire_time_seconds < 0:
+                expire_time_seconds = None
+            else:
+                announcement_data["expireTime"] = time_tool.time_format(kwargs.get(
+                    'expireTime', False)).isoformat(timespec="seconds")+"Z"
+
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
 
         self.redis_announcement.set(name=announcement_name,
