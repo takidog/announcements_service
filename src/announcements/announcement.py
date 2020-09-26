@@ -67,18 +67,17 @@ class AnnouncementService:
 
         return announcements[temp_announcements_index]
 
-    def _get_all_announcement(self):
-        # TODO Add cache on here.
+    def _get_all_announcement(self) -> list:
         # private
         announcement = sorted([json.loads(self.redis_announcement.get(i))
                                for i in self.redis_announcement.scan_iter()], key=lambda k: k['id'])
         return announcement
 
-    def get_all_announcement(self):
+    def get_all_announcement(self) -> list:
         # public
         return [self._mix_index_id(announcement_id=i['id']) for i in self._get_all_announcement()]
 
-    def add_announcement(self, **kwargs):
+    def add_announcement(self, **kwargs) -> bool:
         """Add announcement to redis.
         set required field list on config.py
         Kwargs:
@@ -149,7 +148,7 @@ class AnnouncementService:
                                     value=data_dumps, ex=expire_time_seconds)
         return announcement_id
 
-    def update_announcement(self, announcement_id: int, **kwargs):
+    def update_announcement(self, announcement_id: int, **kwargs) -> bool:
         """Update announcement.
         Args:
             announcement_id ([int]): announcement id.
@@ -213,7 +212,7 @@ class AnnouncementService:
                                     value=data_dumps, ex=expire_time_seconds)
         return True
 
-    def delete_announcement(self, announcement_id: int, force_delete=False):
+    def delete_announcement(self, announcement_id: int, force_delete=False) -> bool:
         """delete announcement.
         Args:
             announcement_id ([int]): announcement id.
