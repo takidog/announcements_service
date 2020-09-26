@@ -192,8 +192,8 @@ class AnnouncementService:
                                     value=data_dumps, ex=expire_time_seconds)
         return True
 
-    def remove_announcement(self, announcement_id: int):
-        """remove announcement.
+    def delete_announcement(self, announcement_id: int, force_delete=False):
+        """delete announcement.
         Args:
             announcement_id ([int]): announcement id.
         Returns:
@@ -202,12 +202,18 @@ class AnnouncementService:
         if announcement_id is None:
             raise falcon.HTTPMissingParam("announcement id")
 
-        announcement_name = "announcement_{announcement_id}".format(
-            announcement_id=announcement_id)
-        if not self.redis_announcement.exists(announcement_name):
-            raise falcon.HTTPNotFound()
+        announcement_name_search = self.redis_announcement.scan(
+            match=f"announcement_{announcement_id}_*")[1]
 
-        self.redis_announcement.delete(announcement_name)
+        if len(announcement_name_search) < 1:
+            raise falcon.HTTPNotFound()
+        if len(announcement_name_search) > 1 and force_delete is False:
+            raise falcon.HTTPServiceUnavailable(
+                title="announcement id conflict", description="this id have conflict, add force delete parameter")
+
+        for name in announcement_name_search:
+            self.redis_announcement.delete(name)
+
         return True
 
 
