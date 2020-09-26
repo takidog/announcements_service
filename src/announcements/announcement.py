@@ -8,6 +8,7 @@ import redis
 from utils import time_tool
 from utils.config import REDIS_URL
 from utils.config import ANNOUNCEMENT_REQUIRED_FIELD
+import logging
 
 
 class AnnouncementService:
