@@ -9,6 +9,7 @@ from utils import time_tool
 from utils.config import REDIS_URL
 from utils.config import ANNOUNCEMENT_REQUIRED_FIELD
 from utils.config import ANNOUNCEMENT_FIELD
+from utils.config import MAX_TAGS_LIMIT
 import logging
 
 
@@ -103,7 +104,6 @@ class AnnouncementService:
         if not any(compare_list) or len(compare_list) != len(ANNOUNCEMENT_REQUIRED_FIELD):
             return False
 
-        announcement_name = "announcement_{announcement_id}_{tag}"
         announcement_list = [i for i in self.redis_announcement.scan_iter()]
         announcement_id = 0
         announcement_list.sort(key=lambda x: int(x.split("_")[1]))
@@ -115,6 +115,7 @@ class AnnouncementService:
             if id_ != int(id_from_key_name):
                 announcement_id = id_
                 break
+        announcement_name = f"announcement_{announcement_id}"
 
         announcement_data = {}
         for key, value in ANNOUNCEMENT_FIELD.items():
@@ -141,10 +142,15 @@ class AnnouncementService:
                 announcement_data["expireTime"] = time_tool.time_format(kwargs.get(
                     'expireTime', False)).isoformat(timespec="seconds")+"Z"
 
+        if kwargs.get('tag', False):
+            kwargs['tag'] = list(set(kwargs['tag']))
+            if len(kwargs['tag']) > MAX_TAGS_LIMIT:
+                announcement_data['tag'] = kwargs['tag'][:MAX_TAGS_LIMIT]
+            else:
+                announcement_data['tag'] = kwargs['tag']
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
 
-        self.redis_announcement.set(name=announcement_name.format(announcement_id=announcement_id,
-                                                                  tag=json.dumps(kwargs.get('tag', []))),
+        self.redis_announcement.set(name=announcement_name,
                                     value=data_dumps, ex=expire_time_seconds)
         return announcement_id
 
@@ -194,7 +200,12 @@ class AnnouncementService:
         announcement_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
         announcement_data['id'] = announcement_id
-
+        if kwargs.get('tag', False):
+            kwargs['tag'] = list(set(kwargs['tag']))
+            if len(kwargs['tag']) > MAX_TAGS_LIMIT:
+                announcement_data['tag'] = kwargs['tag'][:MAX_TAGS_LIMIT]
+            else:
+                announcement_data['tag'] = kwargs['tag']
         expire_time_seconds = None
         if kwargs.get('expireTime', False):
             utc = time_tool.time_format(kwargs.get('expireTime', False))
