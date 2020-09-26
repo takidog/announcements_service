@@ -275,3 +275,27 @@ class AnnouncementService:
                 result[tag] += 1
         return result
 
+    def get_announcement_by_tags(self, tags=[], announcements=None) -> list:
+        """search by tag.
+
+        Args:
+            tags (list, optional): [description]. Defaults to [].
+            announcements ([type], optional): search by cache. Defaults to None.
+
+        Returns:
+            list: announcement list.
+        """
+        if announcements is None:
+            announcements = self._get_all_announcement()
+        if tags == []:
+            return announcements
+        result = []
+        if len(tags) == 1:
+            for announcement in announcements:
+                if tags[0] in announcement['tag']:
+                    result.append(announcement)
+            return self._mix_index_id(result)
+        for announcement in announcements:
+            if not any([None if x in announcement['tag'] else True for x in tags]):
+                result.append(announcement)
+        return self._mix_index_id(result)
