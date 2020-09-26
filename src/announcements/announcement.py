@@ -9,7 +9,7 @@ from utils.time_tool import time_format
 from utils.config import REDIS_URL
 
 
-class Announcements_service:
+class AnnouncementService:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
