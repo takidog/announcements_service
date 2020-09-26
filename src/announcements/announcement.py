@@ -254,3 +254,24 @@ class AnnouncementService:
                     title="announcement have same id conflict")
 
         return announcement_name_search
+
+    def get_tags_count_dict(self, announcements=None) -> dict:
+        """Get all announcements tag count.
+
+        Args:
+            announcements ([type], optional): count by cache. Defaults to None.
+
+        Returns:
+            dict: count dict.
+        """
+        if announcements is None:
+            announcements = self._get_all_announcement()
+        result = {}
+        for announcement in announcements:
+            for tag in announcement['tag']:
+                if not result.get(tag, False):
+                    result[tag] = 1
+                    continue
+                result[tag] += 1
+        return result
+
