@@ -152,3 +152,20 @@ class AnnouncementsRemove:
             return True
 
         raise falcon.HTTPInternalServerError()
+
+
+class AnnouncementsTagCount:
+    auth = {
+        'exempt_methods': ['GET']
+    }
+
+    def __init__(self, cache_manager):
+        self.cache_manager = cache_manager
+
+    def on_get(self, req, resp):
+        '/announcements/tags'
+
+        resp.body = self.cache_manager.cache_get_tags_count_dict()
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True

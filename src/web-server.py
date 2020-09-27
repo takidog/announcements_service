@@ -14,6 +14,10 @@ app.add_route(
     announcement.AnnouncementsById(announcement_service=acs)
 )
 app.add_route(
+    '/announcements/tags',
+    announcement.AnnouncementsTagCount(cache_manager=cache_manager)
+)
+app.add_route(
     '/announcements/add',
     announcement.AnnouncementsAdd(
         cache_manager=cache_manager,
