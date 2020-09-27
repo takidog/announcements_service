@@ -186,7 +186,7 @@ class AnnouncementService:
 
         announcement_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
-        announcement_data['id'] = announcement_id
+        announcement_data['id'] = origin_announcement.get('id')
         if kwargs.get('tag', False):
             kwargs['tag'] = list(set(kwargs['tag']))
             if len(kwargs['tag']) > MAX_TAGS_LIMIT:
