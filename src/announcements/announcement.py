@@ -62,6 +62,13 @@ class AnnouncementService:
 
         return self._mix_index_id(raw_announcements)
 
+    def get_announcement_by_id(self,announcement_id) -> str:
+        announcement_name = f"announcement_{announcement_id}"
+        if self.redis_announcement.exists(announcement_name):
+            return self.redis_announcement.get(announcement_name)
+        raise falcon.HTTPNotFound()        
+
+
     def add_announcement(self, **kwargs) -> bool:
         """Add announcement to redis.
         set required field list on config.py
