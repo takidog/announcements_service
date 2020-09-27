@@ -31,6 +31,8 @@ class AnnouncementService:
             [dict]: news data
             [None]: not found announcement.
         """
+        if len(announcement_data) == 0:
+            return []
         if len(announcement_data) == 1:
             announcement_data[0]['nextId'] = None
             announcement_data[0]['lastId'] = None
