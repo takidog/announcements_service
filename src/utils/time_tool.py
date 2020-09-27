@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def time_format_iso8601(time_str: str) -> datetime:
@@ -46,5 +46,5 @@ def time_format_iso8601(time_str: str) -> datetime:
     except:
         return False
     raw_time = datetime.strptime(time_str[:-1], "%Y-%m-%dT%H:%M:%S")
-    utc_time = raw_time + datetime.timedelta(hours=-time_zone)
+    utc_time = raw_time + timedelta(hours=-time_zone)
     return utc_time
