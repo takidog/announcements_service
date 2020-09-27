@@ -246,7 +246,7 @@ class AnnouncementService:
             list: key name list
         """
         announcement_name_search = self.redis_announcement.scan(
-            match=f"announcement_{announcement_id}_*")[1]
+            match=f"announcement_{announcement_id}")[1]
         if len(announcement_name_search) < 1 and raise_error:
             raise falcon.HTTPNotFound()
         if len(announcement_name_search) > 1:
