@@ -1,16 +1,13 @@
 
 import datetime
 import json
+import logging
 
 import falcon
 import redis
-
 from utils import time_tool
-from utils.config import REDIS_URL
-from utils.config import ANNOUNCEMENT_REQUIRED_FIELD
-from utils.config import ANNOUNCEMENT_FIELD
-from utils.config import MAX_TAGS_LIMIT
-import logging
+from utils.config import (ANNOUNCEMENT_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
+                          MAX_TAGS_LIMIT, REDIS_URL)
 
 
 class AnnouncementService:
@@ -62,12 +59,11 @@ class AnnouncementService:
 
         return self._mix_index_id(raw_announcements)
 
-    def get_announcement_by_id(self,announcement_id) -> str:
+    def get_announcement_by_id(self, announcement_id) -> str:
         announcement_name = f"announcement_{announcement_id}"
         if self.redis_announcement.exists(announcement_name):
             return self.redis_announcement.get(announcement_name)
-        raise falcon.HTTPNotFound()        
-
+        raise falcon.HTTPNotFound()
 
     def add_announcement(self, **kwargs) -> bool:
         """Add announcement to redis.
