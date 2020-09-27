@@ -1,12 +1,7 @@
+import falcon
 import json
 
-import falcon
-
-from cache import school_announcements_cache as sac_cache
-from news import news
-from utils import error_code
-from utils.util import (falcon_admin_required, max_body,
-                        webap_login_cache_required)
+from utils.config import ANNOUNCEMENT_FIELD
 
 
 class Announcements:
@@ -15,17 +10,15 @@ class Announcements:
         'exempt_methods': ['GET']
     }
 
+    def __init__(self, cache_manager):
+        self.cache_manager = cache_manager
+
     def on_get(self, req, resp):
-        '/news​/announcements'
-        news_data = news.get_all_news()
-        if len(news_data) > 0:
-            resp.media = news_data[0]
-            resp.status = falcon.HTTP_200
-            return True
-        else:
-            resp.status = falcon.HTTP_204
-            return True
-        raise falcon.HTTPInternalServerError()
+        '/announcements'
+        resp.body = self.cache_manager.cache_get_all_announcements()
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True
 
 
 class AnnouncementsById:
@@ -34,73 +27,43 @@ class AnnouncementsById:
         'exempt_methods': ['GET']
     }
 
-    def on_get(self, req, resp, news_id):
-        '/news​/announcements/{news_id}'
+    def __init__(self, announcement_service):
+        self.acs = announcement_service
+
+    def on_get(self, req, resp, announcement_id):
+        '/announcements/{announcement_id}'
         try:
-            news_id = int(news_id)
+            announcement_id = int(announcement_id)
         except:
-            raise falcon.HTTPBadRequest()
+            raise falcon.HTTPBadRequest(
+                description="announcement_id must be int.")
 
-        news_data = news.get_news(int(news_id))
-        if isinstance(news_data, dict):
-            resp.media = news_data
-            resp.status = falcon.HTTP_200
-            return True
-        elif news_data is None:
-            resp.status = falcon.HTTP_204
-            return True
-
-        raise falcon.HTTPInternalServerError()
+        resp.body = self.acs.get_announcement_by_id(announcement_id)
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True
 
 
-class AnnouncementsAll:
+class AnnouncementsAdd:
 
-    auth = {
-        'exempt_methods': ['GET']
-    }
+    def __init__(self, cache_manager, announcement_service):
+        self.cache_manager = cache_manager
+        self.acs = announcement_service
 
-    def on_get(self, req, resp):
-        '/news/announcements/all'
-
-        if req.get_param('tag') != None:
-            tag_list = req.get_param('tag').split(';')
-            news_data = news.get_all_by_tag(tag_list)
-        else:
-            news_data = news.get_all_news()
-        if news_data == []:
-            resp.status = falcon.HTTP_204
-            return True
-
-        if isinstance(news_data, list):
-
-            resp.media = {
-                'data': news_data
-            }
-            resp.status = falcon.HTTP_200
-            return True
-
-        raise falcon.HTTPInternalServerError()
-
-
-class NewsAdd:
-
-    @falcon.before(max_body(64 * 1024))
-    @falcon.before(webap_login_cache_required)
-    @falcon.before(falcon_admin_required)
     def on_post(self, req, resp):
 
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
-        # check json key
         for key in req_json.keys():
-            if key not in ['title', 'description', 'imgUrl', 'url', 'weight', 'expireTime', 'tag']:
-                raise falcon.HTTPBadRequest()
-        if not isinstance(req_json.get('weight', 0), int):
-            raise falcon.HTTPBadRequest(description='weight wrong type.')
-        result = news.add_news(**req_json)
+            if key not in ANNOUNCEMENT_FIELD.keys():
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+
+        result = self.acs.add_announcement(**req_json)
         if isinstance(result, int):
             resp.media = {
                 'id': result
             }
+            self.cache_manager.clear_cache()
             resp.status = falcon.HTTP_200
             return True
         elif result is False:
@@ -108,56 +71,50 @@ class NewsAdd:
         raise falcon.HTTPInternalServerError()
 
 
-class NewsUpdate:
+class AnnouncementsUpdate:
 
-    @falcon.before(max_body(64 * 1024))
-    @falcon.before(webap_login_cache_required)
-    @falcon.before(falcon_admin_required)
-    def on_put(self, req, resp, news_id):
+    def __init__(self, cache_manager, announcement_service):
+        self.cache_manager = cache_manager
+        self.acs = announcement_service
+
+    def on_put(self, req, resp, announcement_id):
 
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
-        # check json key
         for key in req_json.keys():
-            if key not in ['title', 'description', 'imgUrl', 'url', 'weight', 'expireTime']:
-                raise falcon.HTTPBadRequest()
-        if not isinstance(req_json.get('weight', 0), int):
-            raise falcon.HTTPBadRequest(description='weight wrong type.')
-        result = news.update_news(news_id=news_id, **req_json)
+            if key not in ANNOUNCEMENT_FIELD.keys():
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+
+        result = self.acs.update_announcement(announcement_id=announcement_id,
+                                              **req_json)
         if result is True:
             resp.media = {
-                "message": "Update success,id {id}.".format(id=news_id)
+                'id': announcement_id
             }
+            self.cache_manager.clear_cache()
             resp.status = falcon.HTTP_200
             return True
-
-        if isinstance(result, int):
-            if result == error_code.NEWS_ERROR:
-                raise falcon.HTTPBadRequest()
-            elif result == error_code.NEWS_NOT_FOUND:
-                raise falcon.HTTPForbidden(description='not found news')
-            elif result == error_code.NEWS_LOSS_ARG:
-                raise falcon.HTTPBadRequest()
-
+        elif result is False:
+            raise falcon.HTTPBadRequest()
         raise falcon.HTTPInternalServerError()
 
 
-class NewsRemove:
+class AnnouncementsRemove:
 
-    @falcon.before(webap_login_cache_required)
-    @falcon.before(falcon_admin_required)
-    def on_delete(self, req, resp, news_id):
+    def __init__(self, cache_manager, announcement_service):
+        self.cache_manager = cache_manager
+        self.acs = announcement_service
 
-        result = news.remove_news(news_id=news_id)
+    def on_delete(self, req, resp, announcement_id):
+
+        result = self.acs.delete_announcement(announcement_id)
         if result is True:
             resp.media = {
-                "message": "Remove success,id {id}.".format(id=news_id)
+                "id": announcement_id,
+                "message": f"Remove success,id {announcement_id}."
             }
+            self.cache_manager.clear_cache()
             resp.status = falcon.HTTP_200
             return True
 
-        if isinstance(result, int):
-            if result == error_code.NEWS_ERROR:
-                raise falcon.HTTPBadRequest()
-            elif result == error_code.NEWS_NOT_FOUND:
-                raise falcon.HTTPForbidden(description='not found news')
         raise falcon.HTTPInternalServerError()
