@@ -2,6 +2,7 @@ import falcon
 import json
 
 from utils.config import ANNOUNCEMENT_FIELD
+from utils.config import LANGUAGE_TAG
 
 
 class Announcements:
@@ -15,7 +16,40 @@ class Announcements:
 
     def on_get(self, req, resp):
         '/announcements'
+        # tag query
+        if req.params.get("tag", False) or req.params.get('lang', False):
+            query_tags = []
+
+            if req.params.get("tag", False):
+                query_tags.extend(req.params.get("tag", "").split(','))
+
+            for lang, value in LANGUAGE_TAG.items():
+                if req.params.get('lang', "") in value:
+                    query_tags.append(lang)
+            resp.body = self.cache_manager.cache_get_announcement_by_tags(
+                tags=query_tags)
+            resp.media = falcon.MEDIA_JSON
+            resp.status = falcon.HTTP_200
+            return True
+        # normal query
         resp.body = self.cache_manager.cache_get_all_announcements()
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True
+
+    def on_post(self, req, resp):
+        # only tag query use POST.
+        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ['tag', 'lang']:
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+
+        query_tags = []
+        query_tags.extend(req_json.get('tag', []))
+        query_tags.append(req_json.get('lang', "zh"))
+        resp.body = self.cache_manager.cache_get_announcement_by_tags(
+            tags=query_tags)
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
@@ -118,3 +152,20 @@ class AnnouncementsRemove:
             return True
 
         raise falcon.HTTPInternalServerError()
+
+
+class AnnouncementsTagCount:
+    auth = {
+        'exempt_methods': ['GET']
+    }
+
+    def __init__(self, cache_manager):
+        self.cache_manager = cache_manager
+
+    def on_get(self, req, resp):
+        '/announcements/tags'
+
+        resp.body = self.cache_manager.cache_get_tags_count_dict()
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True
