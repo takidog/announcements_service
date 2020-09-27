@@ -5,7 +5,7 @@ import logging
 
 import falcon
 import redis
-from utils import time_tool
+from utils.time_tool import time_format_iso8601
 from utils.config import (ANNOUNCEMENT_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
                           MAX_TAGS_LIMIT, REDIS_URL)
 
@@ -122,13 +122,14 @@ class AnnouncementService:
 
         expire_time_seconds = None
         if kwargs.get('expireTime', False):
-            utc = time_tool.time_format(kwargs.get('expireTime', False))
+            utc = time_format_iso8601(kwargs.get('expireTime', False))
             expire_time_seconds = int(
                 (utc-datetime.datetime.utcnow()).total_seconds())
             if expire_time_seconds < 0:
-                expire_time_seconds = None
+                raise falcon.HTTPBadRequest(
+                    description="expeire time set error")
             else:
-                announcement_data["expireTime"] = time_tool.time_format(kwargs.get(
+                announcement_data["expireTime"] = time_format_iso8601(kwargs.get(
                     'expireTime', False)).isoformat(timespec="seconds")+"Z"
 
         if kwargs.get('tag', False):
@@ -197,13 +198,14 @@ class AnnouncementService:
                 announcement_data['tag'] = kwargs['tag']
         expire_time_seconds = None
         if kwargs.get('expireTime', False):
-            utc = time_tool.time_format(kwargs.get('expireTime', False))
+            utc = time_format_iso8601(kwargs.get('expireTime', False))
             expire_time_seconds = int(
                 (utc-datetime.datetime.utcnow()).total_seconds())
             if expire_time_seconds < 0:
-                expire_time_seconds = None
+                raise falcon.HTTPBadRequest(
+                    description="expeire time set error")
             else:
-                announcement_data["expireTime"] = time_tool.time_format(kwargs.get(
+                announcement_data["expireTime"] = time_format_iso8601(kwargs.get(
                     'expireTime', False)).isoformat(timespec="seconds")+"Z"
 
         data_dumps = json.dumps(announcement_data, ensure_ascii=False)
