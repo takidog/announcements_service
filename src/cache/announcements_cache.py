@@ -75,4 +75,6 @@ class CacheManager:
         return data
 
     def clear_cache(self):
-        self.redis_cache.delete(*self.redis_cache.keys())
+        data = self.redis_cache.keys()
+        if len(data) > 0:
+            self.redis_cache.delete(*data)
