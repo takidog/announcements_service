@@ -149,7 +149,11 @@ class AuthService:
                 description="This user isn't register")
 
         editor_list = self.get_editor_list()
-        editor_list.remove(username)
+        try:
+            editor_list.remove(username)
+        except ValueError:
+            raise falcon.HTTPNotAcceptable(
+                description="This user not in editor")
         self.redis_auth.set(name='editor', value=json.dumps(editor_list))
         return True
 
