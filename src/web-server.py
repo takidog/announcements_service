@@ -43,3 +43,11 @@ app.add_route(
         announcement_service=acs
     )
 )
+app.add_route(
+    '/login',
+    auth.Login(auth_service=auth_service)
+)
+app.add_route(
+    '/register',
+    auth.Register(auth_service=auth_service)
+)
