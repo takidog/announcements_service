@@ -141,6 +141,16 @@ class AuthService:
         self.redis_auth.set(name='editor', value=json.dumps(editor_list))
         return True
 
+    def remove_editor(self, username: str) -> bool:
+        if not self.redis_account.exists(username):
+            raise falcon.HTTPNotAcceptable(
+                description="This user isn't register")
+
+        editor_list = self.get_editor_list()
+        editor_list.remove(username)
+        self.redis_auth.set(name='editor', value=json.dumps(editor_list))
+        return True
+
     def jwt_user_loader(self, client_submitted_jwt: dict) -> dict:
         """can make basic check in this function.
 
