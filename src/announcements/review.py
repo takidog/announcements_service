@@ -87,6 +87,7 @@ class ReviewService:
         application_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
         application_data['id'] = application_id
+        application_data['applicant'] = username
 
         if kwargs.get('expireTime', False):
             application_data["expireTime"] = time_format_iso8601(kwargs.get(
@@ -160,6 +161,7 @@ class ReviewService:
         application_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
         application_data['id'] = origin_application.get('id')
+        application_data['applicant'] = origin_application.get('applicant')
         if kwargs.get('tag', False):
             kwargs['tag'] = list(set(kwargs['tag']))
             if len(kwargs['tag']) > MAX_TAGS_LIMIT:
@@ -201,6 +203,8 @@ class ReviewService:
         if application_data is None:
             return False
         data = json.loads(application_data)
+        if data.get('applicant'):
+            del data['applicant']
         add_status = self.acs.add_announcement(**data)
         if isinstance(add_status, bool):
             return False
