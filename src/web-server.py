@@ -51,3 +51,7 @@ app.add_route(
     '/register',
     auth_view.Register(auth_service=auth_service)
 )
+app.add_route(
+    '/auth/editor',
+    auth_view.Editor(auth_service=auth_service)
+)
