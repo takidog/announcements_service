@@ -131,7 +131,9 @@ class AuthService:
         if not self.redis_account.exists(username):
             raise falcon.HTTPNotAcceptable(
                 description="This user isn't register")
-
+        if username in self.get_editor_list():
+            raise falcon.HTTPNotAcceptable(
+                description="user already is editor")
         if not self.redis_auth.exists("editor"):
             editor_list = [username]
             self.redis_auth.set(name='editor', value=json.dumps(editor_list))
