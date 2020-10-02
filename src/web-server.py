@@ -1,6 +1,6 @@
 import falcon
 from view import announcement_view
-from view import auth
+from view import auth_view
 from announcements.announcement import AnnouncementService
 from cache.announcements_cache import CacheManager
 from auth.auth import AuthService
@@ -45,9 +45,9 @@ app.add_route(
 )
 app.add_route(
     '/login',
-    auth.Login(auth_service=auth_service)
+    auth_view.Login(auth_service=auth_service)
 )
 app.add_route(
     '/register',
-    auth.Register(auth_service=auth_service)
+    auth_view.Register(auth_service=auth_service)
 )
