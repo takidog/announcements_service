@@ -109,7 +109,7 @@ class AuthService:
                 _user_level = 0
                 if username in ADMIN:
                     _user_level = 2
-                elif username in self.get_editor_level_user():
+                elif username in self.get_editor_list():
                     _user_level = 1
 
                 jwt_string = self.jwt_auth.get_auth_token(user_payload={
@@ -121,7 +121,7 @@ class AuthService:
 
         raise falcon.HTTPUnauthorized()
 
-    def get_editor_level_user(self) -> list:
+    def get_editor_list(self) -> list:
         if self.redis_auth.exists("editor"):
             return json.loads(self.redis_auth.get('editor'))
         self.redis_auth.set(name='editor', value="[]")
