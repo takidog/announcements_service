@@ -1,13 +1,18 @@
 import falcon
 from view import announcement_view
 from view import auth_view
+from view import application_view
 from announcements.announcement import AnnouncementService
 from cache.announcements_cache import CacheManager
 from auth.auth import AuthService
+from announcements.review import ReviewService
+
 app = falcon.API()
 auth_service = AuthService()
 acs = AnnouncementService()
 cache_manager = CacheManager()
+review_service = ReviewService()
+
 app = falcon.API(middleware=[auth_service.auth_middleware])
 
 app.add_route(
@@ -54,4 +59,22 @@ app.add_route(
 app.add_route(
     '/auth/editor',
     auth_view.Editor(auth_service=auth_service)
+)
+app.add_route(
+    '/application',
+    application_view.GetApplication(
+        review_service=review_service
+    )
+)
+app.add_route(
+    '/user/application/{username}',
+    application_view.GetApplicationByUsername(
+        review_service=review_service
+    )
+)
+app.add_route(
+    '/application/{application_id}',
+    application_view.ApplicationById(
+        review_service=review_service
+    )
 )
