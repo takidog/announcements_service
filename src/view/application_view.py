@@ -60,3 +60,30 @@ class GetApplicationByUsername:
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
+
+
+class ApplicationById:
+    def __init__(self, review_service: ReviewService):
+        self.review_service = review_service
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_put(self, req, resp, application_id: str):
+        '/application/{application_id}'
+        'Update application info, not approve method.'
+
+        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ANNOUNCEMENT_FIELD.keys():
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+        reslut = self.review_service.update_application(
+            application_id=application_id, **req_json)
+        if not isinstance(reslut, bool):
+            raise falcon.HTTPBadRequest(
+                description="Maybe request data not allow.")
+
+        resp.media = {
+            'application_id': application_id
+        }
+        resp.status = falcon.HTTP_200
+        return True
