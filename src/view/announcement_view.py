@@ -3,6 +3,7 @@ import json
 
 from utils.config import ANNOUNCEMENT_FIELD
 from utils.config import LANGUAGE_TAG
+from auth.falcon_auth_decorator import PermissionRequired
 
 
 class Announcements:
@@ -84,6 +85,7 @@ class AnnouncementsAdd:
         self.cache_manager = cache_manager
         self.acs = announcement_service
 
+    @falcon.before(PermissionRequired(permission_level=1))
     def on_post(self, req, resp):
 
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
@@ -111,6 +113,7 @@ class AnnouncementsUpdate:
         self.cache_manager = cache_manager
         self.acs = announcement_service
 
+    @falcon.before(PermissionRequired(permission_level=1))
     def on_put(self, req, resp, announcement_id):
 
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
@@ -139,8 +142,8 @@ class AnnouncementsRemove:
         self.cache_manager = cache_manager
         self.acs = announcement_service
 
+    @falcon.before(PermissionRequired(permission_level=1))
     def on_delete(self, req, resp, announcement_id):
-
         result = self.acs.delete_announcement(announcement_id)
         if result is True:
             resp.media = {

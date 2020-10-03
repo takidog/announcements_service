@@ -17,10 +17,18 @@ ANNOUNCEMENT_FIELD = {
     "description": {"type": str, "allow_user_set": True, "default": None},
     "location": {"type": str, "allow_user_set": True, "default": None},
     "expireTime": {"type": str, "allow_user_set": True, "default": None},
-    "tag": {"type": list, "allow_user_set": True, "default": []}
+    "tag": {"type": list, "allow_user_set": True, "default": []},
+    "applicant": {"type": str, "allow_user_set": False, "default": None}
 }
 
 MAX_TAGS_LIMIT = 20
 CACHE_EXPIRE_SEC = 120
 
-LANGUAGE_TAG = {'zh':['zh','zh-tw','zh-hant'],"en":['en']}
+LANGUAGE_TAG = {'zh': ['zh', 'zh-tw', 'zh-hant'], "en": ['en']}
+
+try:
+    ADMIN = [i for i in os.environ['ADMIN'].split(';') if i != ""]
+except KeyError:
+    ADMIN = []
+
+JWT_EXPIRE_TIME = 3600
