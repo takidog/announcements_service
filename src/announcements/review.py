@@ -198,7 +198,7 @@ class ReviewService:
 
         key_name = self.get_application_key_name_by_id(application_id)
         if key_name is None:
-            falcon.HTTPNotFound()
+            raise falcon.HTTPNotFound()
         self.redis_review_announcement.delete(key_name)
         return True
 
