@@ -25,13 +25,21 @@ class ReviewService:
             url=REDIS_URL, db=3, charset="utf-8", decode_responses=True)
         self.acs = AnnouncementService()
 
-    def get_user_application(self, username: str) -> list:
+    def get_user_application(self, username: str) -> str:
+        """Get applications by username
+
+        Args:
+            username (str): username
+
+        Returns:
+            str: json_string
+        """
         username = self._clear_match_pattern(username)
         result = []
         for i in self.redis_review_announcement.scan_iter(f"application_{username}_*"):
             result.append(self.redis_review_announcement.get(i))
-
-        return result
+        json_string = f"[{','.join(result)}]"
+        return json_string
 
     def _clear_match_pattern(self, key: str) -> str:
         for i in ['*', "?", "[", "]", "-"]:
@@ -43,7 +51,7 @@ class ReviewService:
 
         Returns:
             str: json string
-        """        
+        """
         result = []
         for i in self.redis_review_announcement.scan_iter(f"application_*"):
             result.append(self.redis_review_announcement.get(i))

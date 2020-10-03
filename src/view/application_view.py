@@ -55,8 +55,8 @@ class GetApplicationByUsername:
         if jwt_payload['username'] != username and jwt_payload['permission_level'] < 1:
             raise falcon.HTTPForbidden(description=":)")
 
-        resp.body = json.dumps(self.review_service.get_user_application(
-            username=username))
+        resp.body = self.review_service.get_user_application(
+            username=username)
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
