@@ -105,3 +105,16 @@ class ApplicationById:
             resp.status = falcon.HTTP_200
             return True
         raise falcon.HTTPInternalServerError()
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_delete(self, req, resp, application_id: str):
+        '/application/{application_id}'
+        'delete application by application_id'
+
+        delete_status = self.review_service.delete_application(application_id)
+
+        if delete_status is False:
+            falcon.HTTPNotFound()
+
+        resp.status = falcon.HTTP_200
+        return True
