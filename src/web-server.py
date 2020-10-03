@@ -1,11 +1,10 @@
 import falcon
-from view import announcement_view
-from view import auth_view
-from view import application_view
+
 from announcements.announcement import AnnouncementService
-from cache.announcements_cache import CacheManager
-from auth.auth import AuthService
 from announcements.review import ReviewService
+from auth.auth import AuthService
+from cache.announcements_cache import CacheManager
+from view import announcement_view, application_view, auth_view
 
 app = falcon.API()
 auth_service = AuthService()
