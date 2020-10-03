@@ -49,7 +49,7 @@ class GetApplicationByUsername:
         self.review_service = review_service
 
     def on_get(self, req, resp, username: str):
-        '/application/{username}'
+        '/user/application/{username}'
         # If account have permission, can review all username.
         jwt_payload = req.context['user']['user']
         if jwt_payload['username'] != username and jwt_payload['permission_level'] < 1:
