@@ -38,12 +38,17 @@ class ReviewService:
             key = key.replace(i, "")
         return key
 
-    def get_all_application(self) -> list:
+    def get_all_application(self) -> str:
+        """Get all application.
+
+        Returns:
+            str: json string
+        """        
         result = []
         for i in self.redis_review_announcement.scan_iter(f"application_*"):
             result.append(self.redis_review_announcement.get(i))
-
-        return result
+        json_string = f"[{','.join(result)}]"
+        return json_string
 
     def add_application(self, username, **kwargs) -> bool:
         """Add announcement application to redis(db:3).

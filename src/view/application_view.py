@@ -15,7 +15,7 @@ class GetApplication:
     @falcon.before(PermissionRequired(permission_level=1))
     def on_get(self, req, resp):
         '/application'
-        resp.body = json.dumps(self.review_service.get_all_application())
+        resp.body = self.review_service.get_all_application()
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
