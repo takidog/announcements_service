@@ -87,3 +87,21 @@ class ApplicationById:
         }
         resp.status = falcon.HTTP_200
         return True
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_post(self, req, resp, application_id: str):
+        '/application/{application_id}'
+        'approve application by application_id'
+
+        approve_status = self.review_service.approve_application(
+            application_id)
+        if approve_status is False:
+            # Not found application
+            raise falcon.HTTPNotFound()
+        if isinstance(approve_status, int):
+            resp.media = {
+                'id': approve_status
+            }
+            resp.status = falcon.HTTP_200
+            return True
+        raise falcon.HTTPInternalServerError()
