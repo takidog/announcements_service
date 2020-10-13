@@ -57,9 +57,9 @@ class AuthService:
         Returns:
             bool: True, success register.
         """
-        if len(username) < 8 and len(username) > 64:
+        if len(username) < 8 or len(username) > 64:
             raise falcon.HTTPUnauthorized(description="username length error")
-        if len(password) < 50 and len(password) > 80:
+        if len(password) < 50 or len(password) > 80:
             raise falcon.HTTPUnauthorized(description="password length error")
 
         if self.redis_account.exists(username):
