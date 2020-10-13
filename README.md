@@ -2,7 +2,7 @@
 
 [EN? (None)]()
 
-[Docs](https://github.page.taki.dog/announcements_service/swagger_api.html)(正在編寫，暫不服務)
+[Docs](https://github.page.taki.dog/announcements_service/swagger_api.html)
 
 提供**簡單**可自定格式與簡單審查服務的API，使用Redis做資料儲存。
 
@@ -83,7 +83,7 @@ GET `/announcements/1`
 
 - [ ] Oauth
 - [ ] Docker
-- [ ] API Docs
+- [x] API Docs
 - [ ] requirements.txt 
 
 
