@@ -214,6 +214,21 @@ paths:
                   value:
                     title: "401 Unauthorized"
                     description: "password length error"
+  /user/info:
+    get:
+      security:
+        - api_key: []
+      summary: get user JWT payload data
+      tags:
+        - auth
+      deprecated: false
+      responses:
+        "200":
+          description: "user info"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_info"
   /auth/editor:
     get:
       security:
@@ -460,6 +475,23 @@ components:
       required:
         - tag
         - lang
+    user_info:
+      title: user_info
+      example:
+        username: "123"
+        login_type: "Oauth2"
+        permission_level: 0
+      type: object
+      properties:
+        username:
+          type: string
+        login_type:
+          type: string
+          description: "Oauth2(login by Google Oauth2)
+            General (login by username and password)"
+        permission_level:
+          type: integer
+          description: permission level
     announcement_id:
       type: object
       properties:
