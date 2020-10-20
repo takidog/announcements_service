@@ -1,0 +1,622 @@
+openapi: 3.0.0
+info:
+  version: "1.0"
+  title: announce_service
+  contact: {}
+paths:
+  /announcements/add:
+    post:
+      security:
+        - api_key: []
+      summary: add application (User)
+      tags:
+        - application
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/application_submit_data_type"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/application_success"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+  /application/application_id/{application_id}:
+    put:
+      security:
+        - api_key: []
+      summary: Update application (Admin or editor required.)
+      tags:
+        - application
+      operationId: Updateapplication(foreditor)
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/get_application_data_type"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/application_success"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+    post:
+      security:
+        - api_key: []
+      summary: approve application (Admin or editor required.)
+      tags:
+        - application
+      operationId: approveapplication(foreditor)
+      deprecated: false
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      responses:
+        "200":
+          description: success approve.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/announcement_id"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+    delete:
+      security:
+        - api_key: []
+      summary: remove application (Admin or editor required.)
+      tags:
+        - application
+      operationId: removeapplication(foreditor)
+      deprecated: false
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      responses:
+        "200":
+          description: "success delete application. No content."
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+
+  /application:
+    get:
+      security:
+        - api_key: []
+      summary: get all application (Admin or editor required.)
+      tags:
+        - application
+      deprecated: false
+      responses:
+        "200":
+          description: "Success get all application submit."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/get_application_data_type"
+  /login:
+    post:
+      summary: login
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/login_request"
+        required: true
+      responses:
+        "200":
+          description: Success login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/login_return_api_key"
+        "401":
+          description: password or username error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+  /register:
+    post:
+      summary: register
+      tags:
+        - auth
+      operationId: register
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/login_request"
+        required: true
+      responses:
+        "200":
+          description: Success login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/login_return_api_key"
+        "401":
+          description: "default password length 50~80, username 8~64"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+              examples:
+                already register:
+                  value:
+                    title: "401 Unauthorized"
+                    description: "already register"
+                username_length_error:
+                  value:
+                    title: "401 Unauthorized"
+                    description: "username length error"
+                password_length_error:
+                  value:
+                    title: "401 Unauthorized"
+                    description: "password length error"
+  /auth/editor:
+    get:
+      security:
+        - api_key: []
+      summary: get editor list (Admin required)
+      tags:
+        - auth
+      operationId: geteditorlist
+      deprecated: false
+      responses:
+        "200":
+          description: "editor list"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      security:
+        - api_key: []
+      summary: Add editor (Admin required)
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: "Not content"
+          headers: {}
+        "406":
+          description: "detail see response content, most error are about user status."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+    delete:
+      security:
+        - api_key: []
+      summary: remove editor (Admin required)
+      tags:
+        - auth
+      deprecated: false
+      responses:
+        "200":
+          description: "Not content"
+          headers: {}
+        "406":
+          description: "detail see response content, most error are about user status."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+  /announcements/update/{id}:
+    put:
+      security:
+        - api_key: []
+      summary: announcement update (Admin or editor required.)
+      tags:
+        - announcement
+      parameters:
+        - in: path
+          name: id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "announcement id"
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/get_announcement_data_type"
+        required: true
+      responses:
+        "200":
+          description: "Success update."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: update success,id 0.
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by announcement id.
+  /announcements/delete/{id}:
+    delete:
+      parameters:
+        - in: path
+          name: id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "announcement id"
+      security:
+        - api_key: []
+      summary: announcement delete  (Admin or editor required.)
+      tags:
+        - announcement
+      operationId: announcementdelete
+      deprecated: false
+      responses:
+        "200":
+          description: "Success remove."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: Remove success,id 0.
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by announcement id.
+  /announcements:
+    get:
+      summary: get all (Public)
+      tags:
+        - announcement
+      deprecated: false
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/get_announcement_data_type"
+    post:
+      summary: get tag by POST
+      tags:
+        - announcement
+      operationId: gettagbyPOST
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tag_query_request"
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/get_announcement_data_type"
+  /announcements/tags:
+    get:
+      summary: get tag count
+      tags:
+        - announcement
+      operationId: gettagcount
+      deprecated: false
+      responses:
+        "200":
+          description: "all tags annoumcement count. {tagname:tagcount}"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag1:
+                    example: 1
+                  tag2:
+                    example: 2
+
+tags:
+  - name: application
+  - name: auth
+  - name: announcement
+servers:
+  - url: http://example.com/
+components:
+  securitySchemes:
+    api_key:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    login_request:
+      title: login_request
+      example:
+        username: "{{username}}"
+        password: "{{password}}"
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    tag_query_request:
+      title: tag_query_request
+      example:
+        tag:
+          - test
+        lang: zh
+      type: object
+      properties:
+        tag:
+          type: array
+          items:
+            type: string
+        lang:
+          type: string
+      required:
+        - tag
+        - lang
+    announcement_id:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+    application_submit_data_type:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "announcement title."
+        url:
+          type: string
+          description: "announcement other link."
+          example: "https://..."
+        imgUrl:
+          type: string
+          description: "announcement main image link."
+          example: "https://..."
+        description:
+          type: string
+          description: "annoumcement main description."
+          example: "annoumcement main description"
+        location:
+          type: string
+          description: "About this event location."
+          example: "Classroom 101."
+        expireTime:
+          type: string
+          description: "ISO 8601, support all timezome char."
+          example: "2020-10-13T14:49:10Z"
+        tag:
+          type: array
+          items:
+            type: string
+            description: "tag"
+    get_application_data_type:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "announcement title."
+        weight:
+          type: integer
+          description: "Need reviewer set this."
+          example: 0
+        url:
+          type: string
+          description: "announcement other link."
+          example: "https://..."
+        imgUrl:
+          type: string
+          description: "announcement main image link."
+          example: "https://..."
+        description:
+          type: string
+          description: "annoumcement main description."
+          example: "annoumcement main description"
+        location:
+          type: string
+          description: "About this event location."
+          example: "Classroom 101."
+        expireTime:
+          type: string
+          description: "ISO 8601, support all timezome char."
+          example: "2020-10-13T14:49:10Z"
+        tag:
+          type: array
+          items:
+            type: string
+            description: "tag"
+        publishedAt:
+          type: string
+          description: "ISO 8601, support all timezome char."
+          example: "2020-10-13T14:49:10Z"
+        id:
+          type: string
+          description: "application id."
+          example: "LxTOUSBfPTrNcfA9"
+        applicant:
+          type: string
+          description: "submit username."
+          example: "xxxx@gmail.com"
+    get_announcement_data_type:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "announcement title."
+        weight:
+          type: integer
+          description: "Need reviewer set this."
+          example: 0
+        url:
+          type: string
+          description: "announcement other link."
+          example: "https://..."
+        imgUrl:
+          type: string
+          description: "announcement main image link."
+          example: "https://..."
+        description:
+          type: string
+          description: "annoumcement main description."
+          example: "annoumcement main description"
+        location:
+          type: string
+          description: "About this event location."
+          example: "Classroom 101."
+        expireTime:
+          type: string
+          description: "ISO 8601, support all timezome char."
+          example: "2020-10-13T14:49:10Z"
+        tag:
+          type: array
+          items:
+            type: string
+            description: "tag"
+        publishedAt:
+          type: string
+          description: "ISO 8601, support all timezome char."
+          example: "2020-10-13T14:49:10Z"
+        id:
+          type: integer
+          description: "annoumcement id."
+          example: 0
+        nextId:
+          type: integer
+          description: "next announcement id"
+          example: 1
+        lastId:
+          type: integer
+          description: "last announcement id"
+          example: null
+
+    application_success:
+      type: object
+      properties:
+        application_id:
+          type: string
+          description: "application id, wait for editor review."
+          example: LxTOUSBfPTrNcfA9
+    401_Unauthorized:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "login fail."
+          example: "401 Unauthorized"
+        description:
+          type: string
+          description: "fail description."
+    login_return_api_key:
+      type: object
+      properties:
+        key:
+          type: string
+          description: "JWT"
+          example: "aaa.aaaa.zzz"
