@@ -114,6 +114,7 @@ class AuthService:
 
                 jwt_string = self.jwt_auth.get_auth_token(user_payload={
                     "username": username,
+                    "login_type": "General",
                     "permission_level": _user_level
                 })
 
