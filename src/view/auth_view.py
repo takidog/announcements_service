@@ -1,7 +1,7 @@
 import falcon
 import json
 
-from auth.auth import AuthService
+from auth.auth_service import AuthService
 from utils.config import JWT_EXPIRE_TIME
 from auth.falcon_auth_decorator import PermissionRequired
 

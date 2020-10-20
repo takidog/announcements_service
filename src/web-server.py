@@ -2,7 +2,7 @@ import falcon
 
 from announcements.announcement import AnnouncementService
 from announcements.review import ReviewService
-from auth.auth import AuthService
+from auth.auth_service import AuthService
 from cache.announcements_cache import CacheManager
 from view import announcement_view, application_view, auth_view
 
