@@ -117,3 +117,14 @@ class Editor:
             return True
         self.auth_service.remove_editor(req_json['username'])
         return True
+
+
+class UserInfo:
+    """/user/info
+    Just check JWT and return payload data.
+    """
+
+    def on_get(self, req, resp):
+        resp.media = req.context['user']['user']
+        resp.status = falcon.HTTP_200
+        return True

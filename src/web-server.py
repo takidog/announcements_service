@@ -77,3 +77,8 @@ app.add_route(
         review_service=review_service
     )
 )
+
+app.add_route(
+    '/user/info',
+    auth_view.UserInfo()
+)
