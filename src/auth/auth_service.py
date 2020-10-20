@@ -1,16 +1,17 @@
 
 import datetime
+import hashlib
 import json
 import logging
+import os
+import secrets
 
 import falcon
 import redis
 from falcon_auth import FalconAuthMiddleware, JWTAuthBackend
+from utils.config import ADMIN, JWT_EXPIRE_TIME, REDIS_URL
 
-from utils.config import REDIS_URL, JWT_EXPIRE_TIME, ADMIN
-import secrets
-import hashlib
-import os
+from auth.google_oauth import google_sign_in
 
 
 class AuthService:
@@ -169,3 +170,28 @@ class AuthService:
         """
 
         return client_submitted_jwt
+
+    def google_oauth_login(self, code: str) -> str:
+
+        user_info_by_google = google_sign_in(code=code)
+
+        if user_info_by_google.get("verified_email", False) == False:
+            falcon.HTTPForbidden("Your email need verified.")
+        user_mail = user_info_by_google.get('email', False)
+        if user_mail is False:
+            falcon.HTTPServiceUnavailable(
+                description="Get user email error :(")
+        user_mail = user_mail.lower()
+
+        _user_level = 0
+        if user_mail in ADMIN:
+            _user_level = 2
+        elif user_mail in self.get_editor_list():
+            _user_level = 1
+
+        jwt_string = self.jwt_auth.get_auth_token(user_payload={
+            "username": user_mail,
+            "login_type": "Oauth2",
+            "permission_level": _user_level
+        })
+        return jwt_string
