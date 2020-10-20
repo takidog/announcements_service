@@ -128,3 +128,31 @@ class UserInfo:
         resp.media = req.context['user']['user']
         resp.status = falcon.HTTP_200
         return True
+
+
+class GoogleOauthLogin:
+
+    auth = {
+        'exempt_methods': ['POST']
+    }
+
+    def __init__(self, auth_service: AuthService):
+        self.auth_service = auth_service
+
+    def on_post(self, req, resp):
+        "/oauth2/google/login"
+        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ['code']:
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+
+        # 401 error will raise in auth_service
+        login_jwt = self.auth_service.google_oauth_login(code=req_json['code'])
+        resp.set_cookie('Authorization',
+                        f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
+        resp.media = {
+            'key': login_jwt
+        }
+        resp.status = falcon.HTTP_200
+        return True
