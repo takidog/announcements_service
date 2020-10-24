@@ -1,10 +1,25 @@
 import falcon
 import json
 
-from utils.config import ANNOUNCEMENT_FIELD
+from utils.config import ANNOUNCEMENT_FIELD, ALLOW_APPLICATION_OWNER_MODIFY
 from utils.config import LANGUAGE_TAG
 from auth.falcon_auth_decorator import PermissionRequired
 from announcements.review import ReviewService
+
+
+def only_owner_modify(
+        review_service: ReviewService,
+        application_id: str,
+        applicant_username: str):
+
+    origin_application = review_service.get_application_by_id(
+        application_id=application_id
+    )
+    if origin_application is None:
+        raise falcon.HTTPNotFound()
+
+    if json.loads(origin_application)['applicant'] != applicant_username:
+        raise falcon.HTTPUnauthorized(title="no permission to update")
 
 
 class GetApplication:
@@ -66,10 +81,17 @@ class ApplicationById:
     def __init__(self, review_service: ReviewService):
         self.review_service = review_service
 
-    @falcon.before(PermissionRequired(permission_level=1))
     def on_put(self, req, resp, application_id: str):
         '/application/{application_id}'
         'Update application info, not approve method.'
+
+        jwt_payload = req.context['user']['user']
+        if ALLOW_APPLICATION_OWNER_MODIFY:
+            only_owner_modify(
+                review_service=self.review_service,
+                application_id=application_id,
+                applicant_username=jwt_payload['username']
+            )
 
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
@@ -106,10 +128,17 @@ class ApplicationById:
             return True
         raise falcon.HTTPInternalServerError()
 
-    @falcon.before(PermissionRequired(permission_level=1))
     def on_delete(self, req, resp, application_id: str):
         '/application/{application_id}'
         'delete application by application_id'
+
+        jwt_payload = req.context['user']['user']
+        if ALLOW_APPLICATION_OWNER_MODIFY:
+            only_owner_modify(
+                review_service=self.review_service,
+                application_id=application_id,
+                applicant_username=jwt_payload['username']
+            )
 
         delete_status = self.review_service.delete_application(application_id)
 

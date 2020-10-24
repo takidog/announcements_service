@@ -5,6 +5,7 @@ try:
 except KeyError:
     REDIS_URL = 'redis://127.0.0.1:6379'
 
+ALLOW_APPLICATION_OWNER_MODIFY = True
 ANNOUNCEMENT_REQUIRED_FIELD = ["title"]
 
 ANNOUNCEMENT_FIELD = {
