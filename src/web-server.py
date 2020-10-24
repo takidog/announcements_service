@@ -5,7 +5,7 @@ from announcements.review import ReviewService
 from auth.auth_service import AuthService
 from cache.announcements_cache import CacheManager
 from view import announcement_view, application_view, auth_view
-
+from utils.config import SUPPORT_GOOGLE_OAUTH2
 app = falcon.API()
 auth_service = AuthService()
 acs = AnnouncementService()
@@ -82,3 +82,9 @@ app.add_route(
     '/user/info',
     auth_view.UserInfo()
 )
+
+if SUPPORT_GOOGLE_OAUTH2:
+    app.add_route(
+        '/oauth2/google/login',
+        auth_view.GoogleOauthLogin(auth_service=auth_service)
+    )
