@@ -1,10 +1,25 @@
 import falcon
 import json
 
-from utils.config import ANNOUNCEMENT_FIELD
+from utils.config import ANNOUNCEMENT_FIELD, ALLOW_APPLICATION_OWNER_MODIFY
 from utils.config import LANGUAGE_TAG
 from auth.falcon_auth_decorator import PermissionRequired
 from announcements.review import ReviewService
+
+
+def only_owner_modify(
+        review_service: ReviewService,
+        application_id: str,
+        applicant_username: str):
+
+    origin_application = review_service.get_application_by_id(
+        application_id=application_id
+    )
+    if origin_application is None:
+        raise falcon.HTTPNotFound()
+
+    if json.loads(origin_application)['applicant'] != applicant_username:
+        raise falcon.HTTPUnauthorized(title="no permission to update")
 
 
 class GetApplication:
