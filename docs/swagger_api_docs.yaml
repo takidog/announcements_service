@@ -4,35 +4,65 @@ info:
   title: announce_service
   contact: {}
 paths:
-  /announcements/add:
-    post:
+  /application/status/{username}:
+    get:
       security:
         - api_key: []
-      summary: add application (User)
+      summary: "Get application status by username"
       tags:
         - application
+      parameters:
+        - in: path
+          name: username
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "username"
       deprecated: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/application_submit_data_type"
-        required: true
       responses:
         "200":
           description: Success.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/application_success"
+                type: array
+                items:
+                  $ref: "#/components/schemas/application_status"
         "401":
           description: auth problem.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/401_Unauthorized"
-        "404":
-          description: not found application by application_id.
+        "403":
+          description: not owner or editor.
+  /application/status/all:
+    get:
+      security:
+        - api_key: []
+      summary: "Get all application (Admin and editor only)"
+      tags:
+        - application
+      deprecated: false
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/application_status"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "403":
+          description: not owner or editor.
   /application/application_id/{application_id}:
     put:
       security:
@@ -72,6 +102,8 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by application_id.
+        "403":
+          description: not owner or editor.
     post:
       security:
         - api_key: []
@@ -104,6 +136,8 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by application_id.
+        "403":
+          description: not owner or editor.
     delete:
       security:
         - api_key: []
@@ -132,6 +166,8 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by application_id.
+        "403":
+          description: not owner or editor.
 
   /application:
     get:
@@ -150,6 +186,36 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/get_application_data_type"
+        "403":
+          description: not owner or editor.
+    post:
+      security:
+        - api_key: []
+      summary: submit application (User)
+      tags:
+        - application
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/application_submit_data_type"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/application_success"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
   /login:
     post:
       summary: login
@@ -335,6 +401,8 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by announcement id.
+        "403":
+          description: not owner or editor.
   /announcements/delete/{id}:
     delete:
       parameters:
@@ -375,6 +443,8 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by announcement id.
+        "403":
+          description: not owner or editor.
   /announcements:
     get:
       summary: get all (Public)
@@ -498,6 +568,23 @@ components:
         id:
           type: integer
           example: 0
+    application_status:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+          description: 3 status, success fail waiting
+        description:
+          type: string
+          example: no allow, blablabla..
+        application_id:
+          type: string
+          example: "asdfghj"
+        announcement_id:
+          type: integer
+          example: 1
+          description: on allow post.
     application_submit_data_type:
       type: object
       properties:
@@ -645,6 +732,8 @@ components:
         description:
           type: string
           description: "fail description."
+    403_Forbidden:
+      description: "not allow"
     login_return_api_key:
       type: object
       properties:
