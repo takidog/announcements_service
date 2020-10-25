@@ -22,4 +22,4 @@ class PermissionRequired(object):
     def __call__(self, req, resp, resource, params):
         payload = req.context['user']['user']
         if payload['permission_level'] < self._permission_level:
-            raise falcon.HTTPUnauthorized(description="permission error.")
+            raise falcon.HTTPForbidden(description="permission error.")

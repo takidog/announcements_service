@@ -19,7 +19,7 @@ def only_owner_modify(
         raise falcon.HTTPNotFound()
 
     if json.loads(origin_application)['applicant'] != applicant_username:
-        raise falcon.HTTPUnauthorized(title="no permission to update")
+        raise falcon.HTTPForbidden(title="no permission to update")
 
 
 class GetApplication:
