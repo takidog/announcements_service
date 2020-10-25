@@ -8,7 +8,7 @@ paths:
     get:
       security:
         - api_key: []
-      summary: "Get application status by username"
+      summary: 'Get application status by username'
       tags:
         - application
       parameters:
@@ -29,7 +29,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/application_status"
+                  $ref: '#/components/schemas/application_status'
         "401":
           description: auth problem.
           content:
@@ -42,7 +42,7 @@ paths:
     get:
       security:
         - api_key: []
-      summary: "Get all application (Admin and editor only)"
+      summary: 'Get all application (Admin and editor only)'
       tags:
         - application
       deprecated: false
@@ -54,7 +54,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/application_status"
+                  $ref: '#/components/schemas/application_status'
         "401":
           description: auth problem.
           content:
@@ -294,7 +294,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/user_info"
+                $ref: '#/components/schemas/user_info'
   /auth/editor:
     get:
       security:
@@ -558,7 +558,7 @@ components:
         login_type:
           type: string
           description: "Oauth2(login by Google Oauth2)
-            General (login by username and password)"
+                        General (login by username and password)"
         permission_level:
           type: integer
           description: permission level
@@ -573,8 +573,8 @@ components:
       properties:
         status:
           type: string
-          example: success
-          description: 3 status, success fail waiting
+          example:  approve
+          description: 3 status, approve, reject, waiting
         description:
           type: string
           example: no allow, blablabla..
