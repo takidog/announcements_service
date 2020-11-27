@@ -111,12 +111,6 @@ class ApplicationById:
         resp.status = falcon.HTTP_200
         return True
 
-    @falcon.before(PermissionRequired(permission_level=1))
-    def on_post(self, req, resp, application_id: str):
-        '/application/{application_id}'
-        # TODO: Change this function to user edit own application.
-        pass
-
     def on_delete(self, req, resp, application_id: str):
         '/application/{application_id}'
         'delete application by application_id'

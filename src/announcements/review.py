@@ -8,7 +8,7 @@ import redis
 from utils.time_tool import time_format_iso8601
 from utils.tools import rand_str
 from utils.config import (ANNOUNCEMENT_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
-                          MAX_TAGS_LIMIT, REDIS_URL)
+                          MAX_TAGS_LIMIT, REDIS_URL, APPLICATION_EXPIRE_TIME_AFTER_APPROVE)
 from announcements.announcement import AnnouncementService
 
 
@@ -187,6 +187,9 @@ class ReviewService:
         if kwargs.get('expireTime', False):
             application_data["expireTime"] = time_format_iso8601(kwargs.get(
                 'expireTime', False)).isoformat(timespec="seconds")+"Z"
+
+        application_data['reviewStatus'] = None
+        application_data['reviewDescription'] = "Application already updated, need review."
 
         data_dumps = json.dumps(application_data, ensure_ascii=False)
 
