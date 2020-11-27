@@ -87,6 +87,7 @@ class ApplicationById:
 
         jwt_payload = req.context['user']['user']
         if ALLOW_APPLICATION_OWNER_MODIFY:
+            # If not owner or admin will raise falcon Error.
             only_owner_modify(
                 review_service=self.review_service,
                 application_id=application_id,
@@ -110,24 +111,6 @@ class ApplicationById:
         resp.status = falcon.HTTP_200
         return True
 
-    @falcon.before(PermissionRequired(permission_level=1))
-    def on_post(self, req, resp, application_id: str):
-        '/application/{application_id}'
-        'approve application by application_id'
-
-        approve_status = self.review_service.approve_application(
-            application_id)
-        if approve_status is False:
-            # Not found application
-            raise falcon.HTTPNotFound()
-        if isinstance(approve_status, int):
-            resp.media = {
-                'id': approve_status
-            }
-            resp.status = falcon.HTTP_200
-            return True
-        raise falcon.HTTPInternalServerError()
-
     def on_delete(self, req, resp, application_id: str):
         '/application/{application_id}'
         'delete application by application_id'
@@ -147,3 +130,44 @@ class ApplicationById:
 
         resp.status = falcon.HTTP_200
         return True
+
+
+class ApplicationAction:
+    def __init__(self, review_service: ReviewService):
+        self.review_service = review_service
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_put(self, req, resp, application_id: str, action: str):
+
+        if action == "approve":
+            '/application/{application_id}/approve'
+            'approve application by application_id'
+            approve_status = self.review_service.approve_application(
+                application_id)
+            if approve_status is False:
+                # Not found application
+                raise falcon.HTTPNotFound()
+            if isinstance(approve_status, int):
+                resp.media = {
+                    'id': approve_status
+                }
+                resp.status = falcon.HTTP_200
+                return True
+        elif action == "reject":
+            '/application/{application_id}/reject'
+            'reject application by application_id'
+
+            req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+
+            reject_status = self.review_service.reject_application(
+                application_id=application_id,
+                review_description=req_json.get("description", None)
+            )
+            if reject_status is False:
+                # Not found application
+                raise falcon.HTTPNotFound()
+
+            if reject_status:
+                return True
+
+        raise falcon.HTTPInternalServerError()

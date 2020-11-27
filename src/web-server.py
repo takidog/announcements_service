@@ -79,6 +79,13 @@ app.add_route(
 )
 
 app.add_route(
+    '/application/{application_id}/{action}',
+    application_view.ApplicationAction(
+        review_service=review_service
+    )
+)
+
+app.add_route(
     '/user/info',
     auth_view.UserInfo()
 )

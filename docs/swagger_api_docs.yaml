@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: "1.0"
+  version: "1.1"
   title: announce_service
   contact: {}
 paths:
@@ -8,7 +8,7 @@ paths:
     get:
       security:
         - api_key: []
-      summary: 'Get application status by username'
+      summary: "Get application status by username"
       tags:
         - application
       parameters:
@@ -29,7 +29,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/application_status'
+                  $ref: "#/components/schemas/application_status"
         "401":
           description: auth problem.
           content:
@@ -42,7 +42,7 @@ paths:
     get:
       security:
         - api_key: []
-      summary: 'Get all application (Admin and editor only)'
+      summary: "Get all application (Admin and editor only)"
       tags:
         - application
       deprecated: false
@@ -54,7 +54,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/application_status'
+                  $ref: "#/components/schemas/application_status"
         "401":
           description: auth problem.
           content:
@@ -63,7 +63,7 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "403":
           description: not owner or editor.
-  /application/application_id/{application_id}:
+  /application/{application_id}:
     put:
       security:
         - api_key: []
@@ -104,7 +104,39 @@ paths:
           description: not found application by application_id.
         "403":
           description: not owner or editor.
-    post:
+    delete:
+      security:
+        - api_key: []
+      summary: remove application (editor or owner)
+      tags:
+        - application
+      operationId: removeapplication(foreditor)
+      deprecated: false
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      responses:
+        "200":
+          description: "success delete application. No content."
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+        "403":
+          description: not owner or editor.
+
+  /application/{application_id}/approve:
+    put:
       security:
         - api_key: []
       summary: approve application (Admin or editor required.)
@@ -138,13 +170,14 @@ paths:
           description: not found application by application_id.
         "403":
           description: not owner or editor.
-    delete:
+  /application/{application_id}/reject:
+    put:
       security:
         - api_key: []
-      summary: remove application (Admin or editor required.)
+      summary: reject application (Admin or editor required.)
       tags:
         - application
-      operationId: removeapplication(foreditor)
+      operationId: reject_application(foreditor)
       deprecated: false
       parameters:
         - in: path
@@ -155,9 +188,22 @@ paths:
               schema:
                 type: string
                 example: "application id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: reject description, allow null
       responses:
         "200":
-          description: "success delete application. No content."
+          description: success approve.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/announcement_id"
         "401":
           description: auth problem.
           content:
@@ -294,7 +340,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user_info'
+                $ref: "#/components/schemas/user_info"
   /auth/editor:
     get:
       security:
@@ -558,7 +604,7 @@ components:
         login_type:
           type: string
           description: "Oauth2(login by Google Oauth2)
-                        General (login by username and password)"
+            General (login by username and password)"
         permission_level:
           type: integer
           description: permission level
@@ -573,7 +619,7 @@ components:
       properties:
         status:
           type: string
-          example:  approve
+          example: approve
           description: 3 status, approve, reject, waiting
         description:
           type: string
