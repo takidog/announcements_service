@@ -79,8 +79,8 @@ app.add_route(
 )
 
 app.add_route(
-    '/application/{application_id}/approve',
-    application_view.ApplicationApprove(
+    '/application/{application_id}/{action}',
+    application_view.ApplicationAction(
         review_service=review_service
     )
 )

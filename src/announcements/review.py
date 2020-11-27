@@ -101,6 +101,8 @@ class ReviewService:
         ).isoformat(timespec="seconds")+"Z"
         application_data['id'] = application_id
         application_data['applicant'] = username
+        application_data['reviewStatus'] = None
+        application_data['reviewDescription'] = None
 
         if kwargs.get('expireTime', False):
             application_data["expireTime"] = time_format_iso8601(kwargs.get(
@@ -216,10 +218,58 @@ class ReviewService:
         if application_data is None:
             return False
         data = json.loads(application_data)
+        origin_data = dict(data)  # copy object
+
+        if data['reviewStatus'] is True:
+            # Application is already approved. can't duplicate approve.
+            return False
+
         if data.get('applicant'):
             del data['applicant']
+        del data['reviewStatus']
+        del data['reviewDescription']
         add_status = self.acs.add_announcement(**data)
         if isinstance(add_status, bool):
             return False
-        self.delete_application(application_id)
+        # approve status
+        origin_data['reviewStatus'] = True
+        # clear review message
+        origin_data['reviewDescription'] = None
+        self.redis_review_announcement.set(
+            name=self.get_application_key_name_by_id(
+                application_id=application_id),
+            value=json.dumps(origin_data),
+            ex=APPLICATION_EXPIRE_TIME_AFTER_APPROVE
+        )
+
         return add_status
+
+    def reject_application(self, application_id: str, review_description: str) -> bool:
+        """reject_application
+
+        Args:
+            application_id (str): [description]
+            review_description (str): [description]
+        Returns:
+            bool: True (Update reject success)
+            bool: False (Not found application)
+        """
+        application_data = self.get_application_by_id(application_id)
+        if application_data is None:
+            return False
+        data = json.loads(application_data)
+
+        if data['reviewStatus'] is True:
+            # This application is approved, can't reject.
+            return False
+        # Reject status.
+        data['reviewStatus'] = False
+        data['reviewDescription'] = review_description
+
+        self.redis_review_announcement.set(
+            name=self.get_application_key_name_by_id(
+                application_id=application_id),
+            value=json.dumps(data)
+        )
+
+        return True
