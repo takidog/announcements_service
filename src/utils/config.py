@@ -33,17 +33,20 @@ except KeyError:
     ADMIN = []
 
 JWT_EXPIRE_TIME = 3600
+
+# SS_SUPPORT_GOOGLE_OAUTH2 is for server-side apps sign in with google
+# Detail : https://developers.google.com/identity/sign-in/web/server-side-flow
 try:
-    SUPPORT_GOOGLE_OAUTH2 = os.environ['SUPPORT_GOOGLE_OAUTH2'].lower(
+    SS_SUPPORT_GOOGLE_OAUTH2 = os.environ['SS_SUPPORT_GOOGLE_OAUTH2'].lower(
     ) == "true"
 except KeyError:
-    SUPPORT_GOOGLE_OAUTH2 = False
+    SS_SUPPORT_GOOGLE_OAUTH2 = False
 
 GOOGLE_OAUTH2_CLIENT_ID = None
 GOOGLE_OAUTH2_CLIENT_SECRET = None
 GOOGLE_OAUTH2_REDIRECT_URI = None
 
-if SUPPORT_GOOGLE_OAUTH2:
+if SS_SUPPORT_GOOGLE_OAUTH2:
     GOOGLE_OAUTH2_CLIENT_ID = os.environ['GOOGLE_OAUTH2_CLIENT_ID']
     GOOGLE_OAUTH2_CLIENT_SECRET = os.environ['GOOGLE_OAUTH2_CLIENT_SECRET']
     GOOGLE_OAUTH2_REDIRECT_URI = os.environ['GOOGLE_OAUTH2_REDIRECT_URI']
