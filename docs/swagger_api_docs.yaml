@@ -4,65 +4,6 @@ info:
   title: announce_service
   contact: {}
 paths:
-  /application/status/{username}:
-    get:
-      security:
-        - api_key: []
-      summary: "Get application status by username"
-      tags:
-        - application
-      parameters:
-        - in: path
-          name: username
-          required: true
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "username"
-      deprecated: false
-      responses:
-        "200":
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/application_status"
-        "401":
-          description: auth problem.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/401_Unauthorized"
-        "403":
-          description: not owner or editor.
-  /application/status/all:
-    get:
-      security:
-        - api_key: []
-      summary: "Get all application (Admin and editor only)"
-      tags:
-        - application
-      deprecated: false
-      responses:
-        "200":
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/application_status"
-        "401":
-          description: auth problem.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/401_Unauthorized"
-        "403":
-          description: not owner or editor.
   /application/{application_id}:
     put:
       security:
@@ -212,6 +153,35 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by application_id.
+        "403":
+          description: not owner or editor.
+
+  /user/application/{username}:
+    get:
+      security:
+        - api_key: []
+      summary: get user's application ( editor or owner required.)
+      tags:
+        - application
+      parameters:
+        - in: path
+          name: username
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      deprecated: false
+      responses:
+        "200":
+          description: "Success get all application submit."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/get_application_data_type"
         "403":
           description: not owner or editor.
 
@@ -709,6 +679,14 @@ components:
           type: string
           description: "submit username."
           example: "xxxx@gmail.com"
+        reviewStatus:
+          type: boolean
+          description: "review status, Null is wait for review, False is reject, True is approve "
+          example: False
+        reviewDescription:
+          type: string
+          description: "review description"
+          example: "Need image url or something"
     get_announcement_data_type:
       type: object
       properties:
