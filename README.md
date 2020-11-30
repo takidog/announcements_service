@@ -57,7 +57,7 @@ GET `/announcements/1`
 
    ```bash
    # on src 
-   gunicorn -c gunicorn_config.py web-server:app
+   gunicorn -c gunicorn_config.py web_server:app
    ```
 
    
