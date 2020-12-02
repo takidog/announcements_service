@@ -257,6 +257,63 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/401_Unauthorized"
+  /oauth2/google/login:
+    post:
+      summary: Use redirect code to login (server side verify)
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Success login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/login_return_api_key"
+        "401":
+          description: password or username error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+  /oauth2/google/token:
+    post:
+      summary: Use id_token to login (client side)
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Success login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/login_return_api_key"
+        "401":
+          description: password or username error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+
   /register:
     post:
       summary: register
