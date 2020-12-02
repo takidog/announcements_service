@@ -372,6 +372,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/401_Unauthorized"
+  /announcements/add/{id}:
+    post:
+      security:
+        - api_key: []
+      summary: announcement add (Admin or editor required.)
+      tags:
+        - announcement
+      parameters:
+        - in: path
+          name: id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "announcement id"
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/application_submit_data_type"
+        required: true
+      responses:
+        "200":
+          description: "Success add."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: add success,id 0.
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by announcement id.
+        "403":
+          description: not owner or editor.
+
   /announcements/update/{id}:
     put:
       security:
