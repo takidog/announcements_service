@@ -11,7 +11,7 @@ import redis
 from falcon_auth import FalconAuthMiddleware, JWTAuthBackend
 from utils.config import ADMIN, JWT_EXPIRE_TIME, REDIS_URL
 
-from auth.google_oauth import google_sign_in
+from auth.google_oauth import google_sign_in, get_user_profile_from_id_token
 
 
 class AuthService:
@@ -175,6 +175,29 @@ class AuthService:
 
         user_info_by_google = google_sign_in(code=code)
 
+        if user_info_by_google.get("verified_email", False) == False:
+            falcon.HTTPForbidden("Your email need verified.")
+        user_mail = user_info_by_google.get('email', False)
+        if user_mail is False:
+            falcon.HTTPServiceUnavailable(
+                description="Get user email error :(")
+        user_mail = user_mail.lower()
+
+        _user_level = 0
+        if user_mail in ADMIN:
+            _user_level = 2
+        elif user_mail in self.get_editor_list():
+            _user_level = 1
+
+        jwt_string = self.jwt_auth.get_auth_token(user_payload={
+            "username": user_mail,
+            "login_type": "Oauth2",
+            "permission_level": _user_level
+        })
+        return jwt_string
+
+    def google_oauth_login_by_id_token(self, id_token: str) -> str:
+        user_info_by_google = get_user_profile_from_id_token(id_token=id_token)
         if user_info_by_google.get("verified_email", False) == False:
             falcon.HTTPForbidden("Your email need verified.")
         user_mail = user_info_by_google.get('email', False)

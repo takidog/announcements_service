@@ -97,3 +97,7 @@ if SS_SUPPORT_GOOGLE_OAUTH2:
         '/oauth2/google/login',
         auth_view.GoogleOauthLogin(auth_service=auth_service)
     )
+app.add_route(
+    '/oauth2/google/token',
+    auth_view.GoogleOauthLoginByIdToken(auth_service=auth_service)
+)

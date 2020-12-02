@@ -5,7 +5,8 @@ from utils.config import (GOOGLE_OAUTH2_CLIENT_ID,
                           GOOGLE_OAUTH2_REDIRECT_URI,)
 
 GOOGLE_OAUTH2_AUTH_URL = 'https://www.googleapis.com/oauth2/v3/token'
-GOOGLE_OAUTH2_AUTH_USER_INFO = " https://www.googleapis.com/oauth2/v2/userinfo"
+GOOGLE_OAUTH2_AUTH_USER_INFO = "https://www.googleapis.com/oauth2/v2/userinfo"
+GOOGLE_OAUTH2_TOKEN_INFO = 'https://oauth2.googleapis.com/tokeninfo'
 
 
 def google_sign_in(code: str) -> dict:
@@ -47,5 +48,19 @@ def google_sign_in(code: str) -> dict:
         raise falcon.HTTPForbidden(
             description="something error on get user info.")
         # raise ValueError("Get user info error")
+
+    return get_user_profile.json()
+
+
+def get_user_profile_from_id_token(id_token: str) -> dict:
+
+    get_user_profile = requests.get(
+        url=GOOGLE_OAUTH2_TOKEN_INFO,
+        params={
+            "id_token": id_token
+        })
+    if get_user_profile.status_code != 200:
+        raise falcon.HTTPForbidden(
+            description="something error on get user info.")
 
     return get_user_profile.json()
