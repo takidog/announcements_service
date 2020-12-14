@@ -27,13 +27,15 @@ class Announcements:
             for lang, value in LANGUAGE_TAG.items():
                 if req.params.get('lang', "") in value:
                     query_tags.append(lang)
-            resp.body = self.cache_manager.cache_get_announcement_by_tags(
-                tags=query_tags)
+
+            resp.body = f'{{"data": {self.cache_manager.cache_get_announcement_by_tags(tags=query_tags)}}}'
+
             resp.media = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_200
             return True
         # normal query
-        resp.body = self.cache_manager.cache_get_all_announcements()
+        resp.body = f'{{"data": {self.cache_manager.cache_get_all_announcements()}}}'
+
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
