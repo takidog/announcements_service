@@ -35,9 +35,7 @@ LANGUAGE_TAG = {'zh': ['zh', 'zh-tw', 'zh-hant'], "en": ['en']}
 
 try:
     ADMIN = [i for i in os.environ['ADMIN'].split(';') if i != ""]
-    print(ADMIN)
 except KeyError:
-    print("ADMIN not set :(")
     ADMIN = []
 
 JWT_EXPIRE_TIME = 3600
