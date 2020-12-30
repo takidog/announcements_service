@@ -179,9 +179,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
         "403":
           description: not owner or editor.
 
@@ -199,9 +202,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
+
         "403":
           description: not owner or editor.
     post:
@@ -583,7 +590,7 @@ paths:
                   data:
                     type: array
                     items:
-                    $ref: "#/components/schemas/get_announcement_data_type"
+                      $ref: "#/components/schemas/get_announcement_data_type"
     post:
       summary: get tag by POST
       tags:
@@ -602,9 +609,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_announcement_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_announcement_data_type"
   /announcements/tags:
     get:
       summary: get tag count
@@ -779,7 +789,7 @@ components:
           type: string
           description: "ISO 8601, support all timezome char."
           example: "2020-10-13T14:49:10Z"
-        id:
+        application_id:
           type: string
           description: "application id."
           example: "LxTOUSBfPTrNcfA9"
