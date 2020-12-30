@@ -22,6 +22,12 @@ ANNOUNCEMENT_FIELD = {
     "applicant": {"type": str, "allow_user_set": False, "default": None}
 }
 
+# copy announcement field because application field have different config.
+APPLICATION_FIELD = ANNOUNCEMENT_FIELD
+del APPLICATION_FIELD['id']
+APPLICATION_FIELD['application_id'] = {
+    "type": str, "allow_user_set": False, "default": ""}
+
 MAX_TAGS_LIMIT = 20
 CACHE_EXPIRE_SEC = 120
 
