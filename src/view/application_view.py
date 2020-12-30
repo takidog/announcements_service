@@ -27,10 +27,18 @@ class GetApplication:
     def __init__(self, review_service: ReviewService):
         self.review_service = review_service
 
-    @falcon.before(PermissionRequired(permission_level=1))
     def on_get(self, req, resp):
         '/application'
-        resp.body = self.review_service.get_all_application()
+        # editor or admin will get all application
+        # user will get their own application
+        jwt_payload = req.context['user']['user']
+        if jwt_payload['permission_level'] > 0:
+            resp.body = self.review_service.get_all_application()
+        else:
+            resp.body = self.review_service.get_user_application(
+                username=jwt_payload['username']
+                )
+
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
