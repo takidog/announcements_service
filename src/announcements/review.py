@@ -7,7 +7,7 @@ import falcon
 import redis
 from utils.time_tool import time_format_iso8601
 from utils.tools import rand_str
-from utils.config import (ANNOUNCEMENT_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
+from utils.config import (APPLICATION_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
                           MAX_TAGS_LIMIT, REDIS_URL, APPLICATION_EXPIRE_TIME_AFTER_APPROVE)
 from announcements.announcement import AnnouncementService
 
@@ -88,7 +88,7 @@ class ReviewService:
         application_name = f"application_{username}_{application_id}"
 
         application_data = {}
-        for key, value in ANNOUNCEMENT_FIELD.items():
+        for key, value in APPLICATION_FIELD.items():
             if isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
                 application_data[key] = kwargs.get(key, None)
                 continue
@@ -99,7 +99,7 @@ class ReviewService:
 
         application_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
-        application_data['id'] = application_id
+        application_data['application_id'] = application_id
         application_data['applicant'] = username
         application_data['reviewStatus'] = None
         application_data['reviewDescription'] = None
@@ -163,7 +163,7 @@ class ReviewService:
             self.get_application_by_id(application_id=application_id))
 
         application_data = {}
-        for key, value in ANNOUNCEMENT_FIELD.items():
+        for key, value in APPLICATION_FIELD.items():
             if isinstance(kwargs.get(key, None), value['type']) and value['allow_user_set']:
                 application_data[key] = kwargs.get(key, None)
                 continue
@@ -175,7 +175,8 @@ class ReviewService:
 
         application_data['publishedAt'] = datetime.datetime.utcnow(
         ).isoformat(timespec="seconds")+"Z"
-        application_data['id'] = origin_application.get('id')
+        application_data['application_id'] = origin_application.get(
+            'application_id')
         application_data['applicant'] = origin_application.get('applicant')
         if kwargs.get('tag', False):
             kwargs['tag'] = list(set(kwargs['tag']))
@@ -231,6 +232,7 @@ class ReviewService:
             del data['applicant']
         del data['reviewStatus']
         del data['reviewDescription']
+        del data['application_id']
         add_status = self.acs.add_announcement(**data)
         if isinstance(add_status, bool):
             return False
