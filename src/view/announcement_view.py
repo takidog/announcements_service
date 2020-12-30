@@ -51,8 +51,10 @@ class Announcements:
         query_tags = []
         query_tags.extend(req_json.get('tag', []))
         query_tags.append(req_json.get('lang', "zh"))
-        resp.body = self.cache_manager.cache_get_announcement_by_tags(
-            tags=query_tags)
+
+        resp.body = f'{{"data": {self.cache_manager.cache_get_announcement_by_tags(
+            tags=query_tags)}}}'
+
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
@@ -75,7 +77,8 @@ class AnnouncementsById:
             raise falcon.HTTPBadRequest(
                 description="announcement_id must be int.")
 
-        resp.body = self.acs.get_announcement_by_id(announcement_id)
+        resp.body = f'{{"data": {self.acs.get_announcement_by_id(announcement_id)}}}'
+
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True
