@@ -96,7 +96,8 @@ class ApplicationById:
         'Update application info, not approve method.'
 
         jwt_payload = req.context['user']['user']
-        if ALLOW_APPLICATION_OWNER_MODIFY:
+        if ALLOW_APPLICATION_OWNER_MODIFY \
+                and jwt_payload['permission_level'] == 0:
             # If not owner or admin will raise falcon Error.
             only_owner_modify(
                 review_service=self.review_service,
@@ -126,7 +127,9 @@ class ApplicationById:
         'delete application by application_id'
 
         jwt_payload = req.context['user']['user']
-        if ALLOW_APPLICATION_OWNER_MODIFY:
+        if ALLOW_APPLICATION_OWNER_MODIFY \
+                and jwt_payload['permission_level'] == 0:
+
             only_owner_modify(
                 review_service=self.review_service,
                 application_id=application_id,
