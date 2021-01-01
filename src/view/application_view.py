@@ -152,8 +152,22 @@ class ApplicationAction:
         if action == "approve":
             '/application/{application_id}/approve'
             'approve application by application_id'
+            # If body is json
+            body = req.bounded_stream.read()
+            review_description = None
+            if len(body) != 0:
+                # If not json type, raise
+                try:
+                    req_json = json.loads(body, encoding='utf-8')
+                except json.decoder.JSONDecodeError:
+                    raise falcon.HTTPNotAcceptable
+                except:
+                    raise falcon.HTTPBadRequest
+                review_description = req_json.get("reviewDescription", None)
             approve_status = self.review_service.approve_application(
-                application_id)
+                application_id,
+                review_description=review_description
+            )
             if approve_status is False:
                 # Not found application
                 raise falcon.HTTPNotFound()
