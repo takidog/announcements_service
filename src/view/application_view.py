@@ -32,12 +32,15 @@ class GetApplication:
         # editor or admin will get all application
         # user will get their own application
         jwt_payload = req.context['user']['user']
+        response_data = "[]"
         if jwt_payload['permission_level'] > 0:
-            resp.body = self.review_service.get_all_application()
+            response_data = self.review_service.get_all_application()
         else:
-            resp.body = self.review_service.get_user_application(
+            response_data = self.review_service.get_user_application(
                 username=jwt_payload['username']
             )
+
+        resp.body = f'{{"data": {response_data}}}'
 
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
@@ -78,8 +81,7 @@ class GetApplicationByUsername:
         if jwt_payload['username'] != username and jwt_payload['permission_level'] < 1:
             raise falcon.HTTPForbidden(description=":)")
 
-        resp.body = self.review_service.get_user_application(
-            username=username)
+        resp.body = f'{{"data": {self.review_service.get_user_application(username=username)}}}'
         resp.media = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
         return True

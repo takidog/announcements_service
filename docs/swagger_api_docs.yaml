@@ -185,9 +185,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
         "403":
           description: not owner or editor.
 
@@ -205,9 +208,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
+
         "403":
           description: not owner or editor.
     post:
@@ -584,9 +591,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_announcement_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_announcement_data_type"
     post:
       summary: get tag by POST
       tags:
@@ -605,9 +615,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_announcement_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_announcement_data_type"
   /announcements/tags:
     get:
       summary: get tag count
