@@ -208,7 +208,7 @@ class ReviewService:
         self.redis_review_announcement.delete(key_name)
         return True
 
-    def approve_application(self, application_id: str) -> bool:
+    def approve_application(self, application_id: str, review_description=None) -> bool:
         """approve_application
 
         Args:
@@ -239,7 +239,7 @@ class ReviewService:
         # approve status
         origin_data['reviewStatus'] = True
         # clear review message
-        origin_data['reviewDescription'] = None
+        origin_data['reviewDescription'] = review_description
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
                 application_id=application_id),

@@ -94,6 +94,12 @@ paths:
               schema:
                 type: string
                 example: "application id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/approve_data"
+        required: false
       responses:
         "200":
           description: success approve.
@@ -870,3 +876,10 @@ components:
           type: string
           description: "JWT"
           example: "aaa.aaaa.zzz"
+    approve_data:
+      type: object
+      properties:
+        reviewDescription:
+          type: string
+          description: "Optional, not required"
+          example: "some review description"
