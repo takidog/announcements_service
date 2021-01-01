@@ -6,7 +6,7 @@ from announcements.review import ReviewService
 from auth.auth_service import AuthService
 from cache.announcements_cache import CacheManager
 from view import announcement_view, application_view, auth_view
-from utils.config import SS_SUPPORT_GOOGLE_OAUTH2
+from utils.config import SS_SUPPORT_GOOGLE_OAUTH2, APPLE_SIGN_IN_AUD
 app = falcon.API()
 auth_service = AuthService()
 acs = AnnouncementService()
@@ -101,3 +101,8 @@ app.add_route(
     '/oauth2/google/token',
     auth_view.GoogleOauthLoginByIdToken(auth_service=auth_service)
 )
+if APPLE_SIGN_IN_AUD != None:
+    app.add_route(
+        '/oauth2/apple/token',
+        auth_view.AppleSignInByIdToken(auth_service=auth_service)
+    )

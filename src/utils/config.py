@@ -58,3 +58,12 @@ if SS_SUPPORT_GOOGLE_OAUTH2:
     GOOGLE_OAUTH2_REDIRECT_URI = os.environ['GOOGLE_OAUTH2_REDIRECT_URI']
 
 APPLICATION_EXPIRE_TIME_AFTER_APPROVE = 60*60*24*30
+
+# The audience registered claim identifies the
+# intended recipient of the client secret.
+# Since the client secret is sent to the validation
+# server, use https://appleid.apple.com.
+try:
+    APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD']
+except KeyError:
+    APPLE_SIGN_IN_AUD = None
