@@ -12,6 +12,7 @@ from falcon_auth import FalconAuthMiddleware, JWTAuthBackend
 from utils.config import ADMIN, JWT_EXPIRE_TIME, REDIS_URL
 
 from auth.google_oauth import google_sign_in, get_user_profile_from_id_token
+from auth.apple_sign_in import verify_id_token as apple_verify_id_token
 
 
 class AuthService:
@@ -215,6 +216,27 @@ class AuthService:
         jwt_string = self.jwt_auth.get_auth_token(user_payload={
             "username": user_mail,
             "login_type": "Oauth2",
+            "permission_level": _user_level
+        })
+        return jwt_string
+
+    def apple_sign_in_by_id_token(self, id_token: str) -> str:
+        jwt_payload = apple_verify_id_token(id_token=id_token)
+        if jwt_payload.get("email", False) == False:
+            falcon.HTTPServiceUnavailable(
+                description="Get user email error :(")
+
+        user_mail = jwt_payload.get("email", "").lower()
+
+        _user_level = 0
+        if user_mail in ADMIN:
+            _user_level = 2
+        elif user_mail in self.get_editor_list():
+            _user_level = 1
+
+        jwt_string = self.jwt_auth.get_auth_token(user_payload={
+            "username": user_mail,
+            "login_type": "Apple_sign_in",
             "permission_level": _user_level
         })
         return jwt_string

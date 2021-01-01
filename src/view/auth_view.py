@@ -185,3 +185,32 @@ class GoogleOauthLoginByIdToken:
         }
         resp.status = falcon.HTTP_200
         return True
+
+
+class AppleSignInByIdToken:
+
+    auth = {
+        'exempt_methods': ['POST']
+    }
+
+    def __init__(self, auth_service: AuthService):
+        self.auth_service = auth_service
+
+    def on_post(self, req, resp):
+        "/oauth2/apple/token"
+        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ['token']:
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+
+        # 401 error will raise in auth_service
+        login_jwt = self.auth_service.apple_sign_in_by_id_token(
+            id_token=req_json['token'])
+        resp.set_cookie('Authorization',
+                        f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
+        resp.media = {
+            'key': login_jwt
+        }
+        resp.status = falcon.HTTP_200
+        return True
