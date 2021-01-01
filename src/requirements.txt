@@ -1,10 +1,11 @@
 certifi==2020.6.20
 chardet==3.0.4
 falcon==2.0.0
-falcon-auth==1.1.0
+# falcon-auth==1.1.0
+git+git://github.com/takidog/falcon-auth#egg=falcon-auth
 gunicorn==20.0.4
 idna==2.10
-PyJWT==1.7.1
+PyJWT==2.0.0
 redis==3.5.3
 requests==2.24.0
 urllib3==1.25.11
