@@ -320,6 +320,35 @@ paths:
               schema:
                 $ref: "#/components/schemas/401_Unauthorized"
 
+  /oauth2/apple/token:
+    post:
+      summary: Use id_token to login (client side) (Apple sign in)
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Success login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/login_return_api_key"
+        "401":
+          description: password or username error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+
   /register:
     post:
       summary: register
