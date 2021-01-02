@@ -240,6 +240,8 @@ class ReviewService:
         del data['reviewStatus']
         del data['reviewDescription']
         del data['application_id']
+        fcm_token = data.get('fcm')
+        del data['fcm']
         add_status = self.acs.add_announcement(**data)
         if isinstance(add_status, bool):
             return False
@@ -247,6 +249,15 @@ class ReviewService:
         origin_data['reviewStatus'] = True
         # clear review message
         origin_data['reviewDescription'] = review_description
+        fcm.send_message()
+        async_pool.apply_async(
+            fcm.send_message,
+            kwds={
+                'fcm_token': fcm_token,
+                'title': "消息審核通過",
+                'description': f"「{data['title']}」審核通過"
+            }
+        )
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
                 application_id=application_id),
@@ -277,6 +288,15 @@ class ReviewService:
         # Reject status.
         data['reviewStatus'] = False
         data['reviewDescription'] = review_description
+
+        async_pool.apply_async(
+            fcm.send_message,
+            kwds={
+                'fcm_token': data.get('fcm'),
+                'title': "消息審核不通過Q_Q",
+                'description': f"{review_description}"
+            }
+        )
 
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
