@@ -27,7 +27,8 @@ APPLICATION_FIELD = ANNOUNCEMENT_FIELD
 del APPLICATION_FIELD['id']
 APPLICATION_FIELD['application_id'] = {
     "type": str, "allow_user_set": False, "default": ""}
-
+APPLICATION_FIELD['fcm'] = {
+    "type": str, "allow_user_set": False, "default": ""}
 MAX_TAGS_LIMIT = 20
 CACHE_EXPIRE_SEC = 120
 

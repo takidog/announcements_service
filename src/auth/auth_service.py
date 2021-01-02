@@ -78,7 +78,7 @@ class AuthService:
         self.redis_account.set(name=username, value=user_data)
         return True
 
-    def login(self, username: str, password: str) -> str:
+    def login(self, username: str, password: str, fcm_token=None) -> str:
         """basic login function
 
         Args:
@@ -117,7 +117,8 @@ class AuthService:
                 jwt_string = self.jwt_auth.get_auth_token(user_payload={
                     "username": username,
                     "login_type": "General",
-                    "permission_level": _user_level
+                    "permission_level": _user_level,
+                    "fcm": fcm_token
                 })
 
                 return jwt_string
@@ -172,7 +173,7 @@ class AuthService:
 
         return client_submitted_jwt
 
-    def google_oauth_login(self, code: str) -> str:
+    def google_oauth_login(self, code: str, fcm_token=None) -> str:
 
         user_info_by_google = google_sign_in(code=code)
 
@@ -193,11 +194,12 @@ class AuthService:
         jwt_string = self.jwt_auth.get_auth_token(user_payload={
             "username": user_mail,
             "login_type": "Oauth2",
-            "permission_level": _user_level
+            "permission_level": _user_level,
+            "fcm": fcm_token
         })
         return jwt_string
 
-    def google_oauth_login_by_id_token(self, id_token: str) -> str:
+    def google_oauth_login_by_id_token(self, id_token: str, fcm_token=None) -> str:
         user_info_by_google = get_user_profile_from_id_token(id_token=id_token)
         if user_info_by_google.get("verified_email", False) == False:
             falcon.HTTPForbidden("Your email need verified.")
@@ -216,11 +218,12 @@ class AuthService:
         jwt_string = self.jwt_auth.get_auth_token(user_payload={
             "username": user_mail,
             "login_type": "Oauth2",
-            "permission_level": _user_level
+            "permission_level": _user_level,
+            "fcm": fcm_token
         })
         return jwt_string
 
-    def apple_sign_in_by_id_token(self, id_token: str) -> str:
+    def apple_sign_in_by_id_token(self, id_token: str, fcm_token=None) -> str:
         jwt_payload = apple_verify_id_token(id_token=id_token)
         if jwt_payload.get("email", False) == False:
             falcon.HTTPServiceUnavailable(
@@ -237,6 +240,7 @@ class AuthService:
         jwt_string = self.jwt_auth.get_auth_token(user_payload={
             "username": user_mail,
             "login_type": "Apple_sign_in",
-            "permission_level": _user_level
+            "permission_level": _user_level,
+            "fcm": fcm_token
         })
         return jwt_string

@@ -2,14 +2,20 @@
 import datetime
 import json
 import logging
+from multiprocessing import pool
 
 import falcon
 import redis
+from utils.config import (ANNOUNCEMENT_REQUIRED_FIELD,
+                          APPLICATION_EXPIRE_TIME_AFTER_APPROVE,
+                          APPLICATION_FIELD, MAX_TAGS_LIMIT, REDIS_URL)
 from utils.time_tool import time_format_iso8601
 from utils.tools import rand_str
-from utils.config import (APPLICATION_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
-                          MAX_TAGS_LIMIT, REDIS_URL, APPLICATION_EXPIRE_TIME_AFTER_APPROVE)
+
+from announcements import fcm
 from announcements.announcement import AnnouncementService
+
+async_pool = pool.ThreadPool()
 
 
 class ReviewService:
@@ -58,7 +64,7 @@ class ReviewService:
         json_string = f"[{','.join(result)}]"
         return json_string
 
-    def add_application(self, username, **kwargs) -> bool:
+    def add_application(self, username, fcm=None, **kwargs) -> bool:
         """Add announcement application to redis(db:3).
         set required field list on config.py
         Kwargs:
@@ -103,7 +109,7 @@ class ReviewService:
         application_data['applicant'] = username
         application_data['reviewStatus'] = None
         application_data['reviewDescription'] = None
-
+        application_data['fcm'] = fcm
         if kwargs.get('expireTime', False):
             application_data["expireTime"] = time_format_iso8601(kwargs.get(
                 'expireTime', False)).isoformat(timespec="seconds")+"Z"
@@ -178,6 +184,7 @@ class ReviewService:
         application_data['application_id'] = origin_application.get(
             'application_id')
         application_data['applicant'] = origin_application.get('applicant')
+        application_data['fcm'] = origin_application.get('fcm')
         if kwargs.get('tag', False):
             kwargs['tag'] = list(set(kwargs['tag']))
             if len(kwargs['tag']) > MAX_TAGS_LIMIT:

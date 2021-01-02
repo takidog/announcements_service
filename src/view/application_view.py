@@ -57,7 +57,9 @@ class GetApplication:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
         reslut = self.review_service.add_application(
-            username=jwt_payload['username'], **req_json)
+            username=jwt_payload['username'],
+            fcm=jwt_payload.get("fcm",None),
+             **req_json)
         if isinstance(reslut, bool):
             raise falcon.HTTPBadRequest(
                 description="Maybe request data not allow.")
