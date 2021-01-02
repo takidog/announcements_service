@@ -68,3 +68,7 @@ try:
     APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD']
 except KeyError:
     APPLE_SIGN_IN_AUD = None
+try:
+    FCM_SERVER_TOKEN = os.environ['FCM_SERVER_TOKEN']
+except KeyError:
+    FCM_SERVER_TOKEN = None
