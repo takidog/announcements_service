@@ -249,7 +249,7 @@ class ReviewService:
         origin_data['reviewStatus'] = True
         # clear review message
         origin_data['reviewDescription'] = review_description
-        fcm.send_message()
+
         async_pool.apply_async(
             fcm.send_message,
             kwds={
