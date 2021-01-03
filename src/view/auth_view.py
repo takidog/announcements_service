@@ -22,9 +22,12 @@ class Login:
             if key not in ['username', 'password', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("fcmToken", "")) > 200:
+        if isinstance(req_json.get("fcmToken"), str) and len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
+        if not isinstance(req_json.get("fcmToken"), str) and req_json.get("fcmToken") != None:
+            raise falcon.HTTPBadRequest(
+                description="FCM key error. (typeError)")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.login(username=req_json['username'],
                                             password=req_json['password'],
@@ -149,9 +152,12 @@ class GoogleOauthLogin:
             if key not in ['code', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("fcmToken", "")) > 200:
+        if isinstance(req_json.get("fcmToken"), str) and len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
+        if not isinstance(req_json.get("fcmToken"), str) and req_json.get("fcmToken") != None:
+            raise falcon.HTTPBadRequest(
+                description="FCM key error. (typeError)")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.google_oauth_login(
             code=req_json['code'], fcm_token=req_json.get('fcmToken'))
@@ -180,9 +186,12 @@ class GoogleOauthLoginByIdToken:
             if key not in ['token', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("fcmToken", "")) > 200:
+        if isinstance(req_json.get("fcmToken"), str) and len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
+        if not isinstance(req_json.get("fcmToken"), str) and req_json.get("fcmToken") != None:
+            raise falcon.HTTPBadRequest(
+                description="FCM key error. (typeError)")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.google_oauth_login_by_id_token(
             id_token=req_json['token'],  fcm_token=req_json.get('fcmToken'))
@@ -211,9 +220,12 @@ class AppleSignInByIdToken:
             if key not in ['token', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("fcmToken", "")) > 200:
+        if isinstance(req_json.get("fcmToken"), str) and len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
+        if not isinstance(req_json.get("fcmToken"), str) and req_json.get("fcmToken") != None:
+            raise falcon.HTTPBadRequest(
+                description="FCM key error. (typeError)")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.apple_sign_in_by_id_token(
             id_token=req_json['token'], fcm_token=req_json.get('fcmToken'))
