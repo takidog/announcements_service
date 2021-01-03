@@ -19,16 +19,16 @@ class Login:
         "/login"
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
-            if key not in ['username', 'password', 'FcmToken']:
+            if key not in ['username', 'password', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("FcmToken", "")) > 200:
+        if len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.login(username=req_json['username'],
                                             password=req_json['password'],
-                                            fcm_token=req_json.get('FcmToken')
+                                            fcm_token=req_json.get('fcmToken')
                                             )
         resp.set_cookie('Authorization',
                         f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
@@ -146,15 +146,15 @@ class GoogleOauthLogin:
         "/oauth2/google/login"
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
-            if key not in ['code', 'FcmToken']:
+            if key not in ['code', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("FcmToken", "")) > 200:
+        if len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.google_oauth_login(
-            code=req_json['code'], fcm_token=req_json.get('FcmToken'))
+            code=req_json['code'], fcm_token=req_json.get('fcmToken'))
         resp.set_cookie('Authorization',
                         f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
         resp.media = {
@@ -177,15 +177,15 @@ class GoogleOauthLoginByIdToken:
         "/oauth2/google/token"
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
-            if key not in ['token', 'FcmToken']:
+            if key not in ['token', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("FcmToken", "")) > 200:
+        if len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.google_oauth_login_by_id_token(
-            id_token=req_json['token'],  fcm_token=req_json.get('FcmToken'))
+            id_token=req_json['token'],  fcm_token=req_json.get('fcmToken'))
         resp.set_cookie('Authorization',
                         f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
         resp.media = {
@@ -208,15 +208,15 @@ class AppleSignInByIdToken:
         "/oauth2/apple/token"
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
-            if key not in ['token', 'FcmToken']:
+            if key not in ['token', 'fcmToken']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
-        if len(req_json.get("FcmToken", "")) > 200:
+        if len(req_json.get("fcmToken", "")) > 200:
             raise falcon.HTTPBadRequest(
                 description="FCM key too long.")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.apple_sign_in_by_id_token(
-            id_token=req_json['token'], fcm_token=req_json.get('FcmToken'))
+            id_token=req_json['token'], fcm_token=req_json.get('fcmToken'))
         resp.set_cookie('Authorization',
                         f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
         resp.media = {
