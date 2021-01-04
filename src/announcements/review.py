@@ -14,7 +14,7 @@ from utils.tools import rand_str
 
 from announcements import fcm
 from announcements.announcement import AnnouncementService
-
+from announcements import webhook
 async_pool = pool.ThreadPool()
 
 
@@ -121,9 +121,9 @@ class ReviewService:
             else:
                 application_data['tag'] = kwargs['tag']
         data_dumps = json.dumps(application_data, ensure_ascii=False)
-
         self.redis_review_announcement.set(name=application_name,
                                            value=data_dumps)
+        webhook.send_all_webhook(**application_data)
         return application_id
 
     def get_application_by_id(self, application_id: str) -> str:
