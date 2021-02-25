@@ -106,3 +106,7 @@ if APPLE_SIGN_IN_AUD != None:
         '/oauth2/apple/token',
         auth_view.AppleSignInByIdToken(auth_service=auth_service)
     )
+app.add_route(
+    '/ban',
+    auth_view.Ban(auth_service=auth_service)
+)

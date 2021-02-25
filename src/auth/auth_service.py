@@ -67,6 +67,11 @@ class AuthService:
 
         if self.redis_account.exists(username):
             raise falcon.HTTPUnauthorized(description="already register")
+
+        if self.is_banned(username):
+            raise falcon.HTTPForbidden(
+                title="banned", description="Your account is banned, any question please ask Facebook fan page.")
+
         s = hashlib.sha256()
         s.update(password.encode('utf-8'))
         _password = s.hexdigest()
@@ -108,6 +113,10 @@ class AuthService:
             s.update(password.encode('utf-8'))
             _password = s.hexdigest()
 
+            if self.is_banned(username):
+                raise falcon.HTTPForbidden(
+                    title="banned", description="Your account is banned, any question please ask Facebook fan page.")
+
             if user_data['password'] == _password:
                 _user_level = 0
                 if username in ADMIN:
@@ -131,6 +140,45 @@ class AuthService:
             return json.loads(self.redis_auth.get('editor'))
         self.redis_auth.set(name='editor', value="[]")
         return []
+
+    def is_banned(self, username: str) -> bool:
+        """is user banned ?
+
+        Args:
+            username (str): username
+
+        Returns:
+            bool: True is banned, False is not.
+        """
+        banned_list = self.get_banned_list()
+        try:
+            banned_list.index(username)
+        except ValueError:
+            return False
+        return True
+
+    def get_banned_list(self) -> list:
+        if self.redis_auth.exists("banned"):
+            return json.loads(self.redis_auth.get('banned'))
+        self.redis_auth.set(name='banned', value="[]")
+        return []
+
+    def ban_user(self, username: str) -> bool:
+        banned_list = self.get_banned_list()
+        banned_list.append(username)
+        self.redis_auth.set(
+            name='banned', value=json.dumps(list(set(banned_list))))
+        return True
+
+    def remove_banned(self, username: str) -> bool:
+        banned_list = self.get_banned_list()
+        try:
+            banned_list.remove(username)
+        except ValueError:
+            return False
+        self.redis_auth.set(
+            name='banned', value=json.dumps(list(set(banned_list))))
+        return True
 
     def add_editor(self, username: str) -> bool:
         if not self.redis_account.exists(username):
@@ -172,6 +220,10 @@ class AuthService:
             [dict]: after check raw_data
         """
 
+        if self.is_banned(client_submitted_jwt.get("user", {}).get("username", "")):
+            raise falcon.HTTPForbidden(
+                title="banned", description="Your account is banned, any question please ask Facebook fan page.")
+
         return client_submitted_jwt
 
     def google_oauth_login(self, code: str, fcm_token=None) -> str:
@@ -192,6 +244,10 @@ class AuthService:
                         user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
                     raise falcon.HTTPForbidden(
                         title="mail organization not allow")
+
+        if self.is_banned(user_mail):
+            raise falcon.HTTPForbidden(
+                title="banned", description="Your account is banned, any question please ask Facebook fan page.")
 
         _user_level = 0
         if user_mail in ADMIN:
@@ -223,6 +279,9 @@ class AuthService:
                         user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
                     raise falcon.HTTPForbidden(
                         title="mail organization not allow")
+        if self.is_banned(user_mail):
+            raise falcon.HTTPForbidden(
+                title="banned", description="Your account is banned, any question please ask Facebook fan page.")
 
         _user_level = 0
         if user_mail in ADMIN:
@@ -253,6 +312,9 @@ class AuthService:
                         user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
                     raise falcon.HTTPForbidden(
                         title="mail organization not allow")
+        if self.is_banned(user_mail):
+            raise falcon.HTTPForbidden(
+                title="banned", description="Your account is banned, any question please ask Facebook fan page.")
 
         _user_level = 0
         if user_mail in ADMIN:

@@ -236,3 +236,55 @@ class AppleSignInByIdToken:
         }
         resp.status = falcon.HTTP_200
         return True
+
+
+class Ban:
+
+    def __init__(self, auth_service: AuthService):
+        self.auth_service = auth_service
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_get(self, req, resp):
+        resp.body = json.dumps(self.auth_service.get_banned_list())
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_post(self, req, resp):
+        req_json = json.loads(
+            req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ["username"]:
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+        if isinstance(req_json['username'], list):
+            for username in req_json['username']:
+                self.auth_service.ban_user(username)
+            resp.status = falcon.HTTP_200
+            return True
+        if isinstance(req_json['username'], str):
+            self.auth_service.ban_user(req_json['username'])
+            resp.status = falcon.HTTP_200
+            return True
+
+        return True
+
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_delete(self, req, resp):
+        req_json = json.loads(
+            req.bounded_stream.read(), encoding='utf-8')
+        for key in req_json.keys():
+            if key not in ["username"]:
+                raise falcon.HTTPBadRequest(
+                    description=f"{key}, key error, not in allow field.")
+        if isinstance(req_json['username'], list):
+            for username in req_json['username']:
+                self.auth_service.remove_banned(username)
+            resp.status = falcon.HTTP_200
+            return True
+        if isinstance(req_json['username'], str):
+            self.auth_service.remove_banned(req_json['username'])
+            resp.status = falcon.HTTP_200
+            return True
+
+        return True
