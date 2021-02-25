@@ -185,6 +185,13 @@ class AuthService:
             falcon.HTTPServiceUnavailable(
                 description="Get user email error :(")
         user_mail = user_mail.lower()
+        if APPLICANT_HOSTNAME_LIMIT != []:
+            user_mail_parse = address.parse(user_mail, addr_spec_only=True)
+            if user_mail_parse is not None:
+                if isinstance(user_mail_parse, address.EmailAddress) and \
+                        user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
+                    raise falcon.HTTPForbidden(
+                        title="mail organization not allow")
 
         _user_level = 0
         if user_mail in ADMIN:
