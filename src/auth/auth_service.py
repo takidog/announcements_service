@@ -9,10 +9,11 @@ import secrets
 import falcon
 import redis
 from falcon_auth import FalconAuthMiddleware, JWTAuthBackend
-from utils.config import ADMIN, JWT_EXPIRE_TIME, REDIS_URL
+from flanker.addresslib import address
+from utils.config import ADMIN, JWT_EXPIRE_TIME, REDIS_URL, APPLICANT_HOSTNAME_LIMIT
 
-from auth.google_oauth import google_sign_in, get_user_profile_from_id_token
 from auth.apple_sign_in import verify_id_token as apple_verify_id_token
+from auth.google_oauth import get_user_profile_from_id_token, google_sign_in
 
 
 class AuthService:
@@ -208,6 +209,13 @@ class AuthService:
             falcon.HTTPServiceUnavailable(
                 description="Get user email error :(")
         user_mail = user_mail.lower()
+        if APPLICANT_HOSTNAME_LIMIT != []:
+            user_mail_parse = address.parse(user_mail, addr_spec_only=True)
+            if user_mail_parse is not None:
+                if isinstance(user_mail_parse, address.EmailAddress) and \
+                        user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
+                    raise falcon.HTTPForbidden(
+                        title="mail organization not allow")
 
         _user_level = 0
         if user_mail in ADMIN:
@@ -230,6 +238,14 @@ class AuthService:
                 description="Get user email error :(")
 
         user_mail = jwt_payload.get("email", "").lower()
+
+        if APPLICANT_HOSTNAME_LIMIT != []:
+            user_mail_parse = address.parse(user_mail, addr_spec_only=True)
+            if user_mail_parse is not None:
+                if isinstance(user_mail_parse, address.EmailAddress) and \
+                        user_mail_parse.hostname not in APPLICANT_HOSTNAME_LIMIT:
+                    raise falcon.HTTPForbidden(
+                        title="mail organization not allow")
 
         _user_level = 0
         if user_mail in ADMIN:

@@ -22,6 +22,8 @@ ANNOUNCEMENT_FIELD = {
     "applicant": {"type": str, "allow_user_set": False, "default": None}
 }
 
+APPLICANT_HOSTNAME_LIMIT = []
+
 # copy announcement field because application field have different config.
 APPLICATION_FIELD = ANNOUNCEMENT_FIELD
 del APPLICATION_FIELD['id']

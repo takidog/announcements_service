@@ -12,3 +12,4 @@ urllib3==1.25.11
 pyjwt[crypto]
 packaging==20.8
 cryptography==3.3.1
+flanker==0.9.11
