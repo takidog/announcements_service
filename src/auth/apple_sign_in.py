@@ -8,7 +8,12 @@ from utils.config import APPLE_SIGN_IN_AUD
 APPLE_AUTH_KEYS_URL = 'https://appleid.apple.com/auth/keys'
 
 
-def verify_id_token(id_token: str) -> dict:
+def verify_id_token(id_token: str, bundle_id=None) -> dict:
+
+    if bundle_id is None:
+        bundle_id = APPLE_SIGN_IN_AUD[0]
+    if bundle_id not in APPLE_SIGN_IN_AUD:
+        raise falcon.HTTPForbidden(description="Not allow bundle id.")
 
     jwt_header = jwt.get_unverified_header(id_token)
 
@@ -26,7 +31,7 @@ def verify_id_token(id_token: str) -> dict:
         id_token,
         signing_key.key,
         algorithms=["RS256"],
-        audience=APPLE_SIGN_IN_AUD,
+        audience=bundle_id,
         options={"verify_exp": False},
     )
     return jwt_decode

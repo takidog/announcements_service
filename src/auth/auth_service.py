@@ -297,8 +297,9 @@ class AuthService:
         })
         return jwt_string
 
-    def apple_sign_in_by_id_token(self, id_token: str, fcm_token=None) -> str:
-        jwt_payload = apple_verify_id_token(id_token=id_token)
+    def apple_sign_in_by_id_token(self, id_token: str, bundle_id=None, fcm_token=None) -> str:
+        jwt_payload = apple_verify_id_token(
+            id_token=id_token, bundle_id=bundle_id)
         if jwt_payload.get("email", False) == False:
             falcon.HTTPServiceUnavailable(
                 description="Get user email error :(")

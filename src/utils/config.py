@@ -68,7 +68,7 @@ APPLICATION_EXPIRE_TIME_AFTER_APPROVE = 60*60*24*30
 # server, use https://appleid.apple.com.
 APPLE_SIGN_IN_AUD = None
 try:
-    APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD']
+    APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD'].split(',')
 except KeyError:
     APPLE_SIGN_IN_AUD = None
 

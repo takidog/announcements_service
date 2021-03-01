@@ -217,7 +217,7 @@ class AppleSignInByIdToken:
         "/oauth2/apple/token"
         req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
         for key in req_json.keys():
-            if key not in ['token', 'fcmToken']:
+            if key not in ['token', 'fcmToken', 'bundleId']:
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
         if isinstance(req_json.get("fcmToken"), str) and len(req_json.get("fcmToken", "")) > 200:
@@ -228,7 +228,7 @@ class AppleSignInByIdToken:
                 description="FCM key error. (typeError)")
         # 401 error will raise in auth_service
         login_jwt = self.auth_service.apple_sign_in_by_id_token(
-            id_token=req_json['token'], fcm_token=req_json.get('fcmToken'))
+            id_token=req_json['token'], bundle_id=req_json.get('bundleId'), fcm_token=req_json.get('fcmToken'))
         resp.set_cookie('Authorization',
                         f'Bearer {login_jwt}', max_age=JWT_EXPIRE_TIME)
         resp.media = {
