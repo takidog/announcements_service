@@ -237,7 +237,7 @@ class AuthService:
             falcon.HTTPServiceUnavailable(
                 description="Get user email error :(")
         user_mail = user_mail.lower()
-        if APPLICANT_HOSTNAME_LIMIT != []:
+        if APPLICANT_HOSTNAME_LIMIT != [] and user_mail not in self.get_editor_list():
             user_mail_parse = address.parse(user_mail, addr_spec_only=True)
             if user_mail_parse is not None:
                 if isinstance(user_mail_parse, address.EmailAddress) and \
@@ -272,7 +272,7 @@ class AuthService:
             falcon.HTTPServiceUnavailable(
                 description="Get user email error :(")
         user_mail = user_mail.lower()
-        if APPLICANT_HOSTNAME_LIMIT != []:
+        if APPLICANT_HOSTNAME_LIMIT != [] and user_mail not in self.get_editor_list():
             user_mail_parse = address.parse(user_mail, addr_spec_only=True)
             if user_mail_parse is not None:
                 if isinstance(user_mail_parse, address.EmailAddress) and \
@@ -306,7 +306,7 @@ class AuthService:
 
         user_mail = jwt_payload.get("email", "").lower()
 
-        if APPLICANT_HOSTNAME_LIMIT != []:
+        if APPLICANT_HOSTNAME_LIMIT != [] and user_mail not in self.get_editor_list():
             user_mail_parse = address.parse(user_mail, addr_spec_only=True)
             if user_mail_parse is not None:
                 if isinstance(user_mail_parse, address.EmailAddress) and \
