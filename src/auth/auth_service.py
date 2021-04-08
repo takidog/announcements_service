@@ -62,6 +62,8 @@ class AuthService:
         """
         if len(username) < 8 or len(username) > 64:
             raise falcon.HTTPUnauthorized(description="username length error")
+        if username.find("@")>-1:
+            raise falcon.HTTPUnauthorized(description="Normal register can't use mail username.")
         if len(password) < 50 or len(password) > 80:
             raise falcon.HTTPUnauthorized(description="password length error")
 
