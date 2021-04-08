@@ -15,6 +15,7 @@ from utils.tools import rand_str
 from announcements import fcm
 from announcements.announcement import AnnouncementService
 from announcements import webhook
+from cache.announcements_cache import CacheManager
 async_pool = pool.ThreadPool()
 
 
@@ -69,7 +70,7 @@ class ReviewService:
         set required field list on config.py
         Kwargs:
             title   [str]:     Required.
-            imgUrl [str]:     Optional.
+            imgUrl [str]:      Optional.
             url     [str]:     Link, optional.
             weight  [int]:     announcement weight,optional.
             description [str]: Optional.
@@ -258,6 +259,7 @@ class ReviewService:
                 'description': f"「{data['title']}」審核通過"
             }
         )
+        CacheManager().clear_cache()
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
                 application_id=application_id),
