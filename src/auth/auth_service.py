@@ -181,9 +181,9 @@ class AuthService:
         return True
 
     def add_editor(self, username: str) -> bool:
-        if not self.redis_account.exists(username):
-            raise falcon.HTTPNotAcceptable(
-                description="This user isn't register")
+        # if not self.redis_account.exists(username):
+        #     raise falcon.HTTPNotAcceptable(
+        #         description="This user isn't register")
         if username in self.get_editor_list():
             raise falcon.HTTPNotAcceptable(
                 description="user already is editor")
@@ -305,7 +305,7 @@ class AuthService:
                 description="Get user email error :(")
 
         user_mail = jwt_payload.get("email", "").lower()
-
+        print(user_mail)
         if APPLICANT_HOSTNAME_LIMIT != [] and user_mail not in self.get_editor_list():
             user_mail_parse = address.parse(user_mail, addr_spec_only=True)
             if user_mail_parse is not None:
