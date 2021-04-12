@@ -124,7 +124,7 @@ class ReviewService:
         data_dumps = json.dumps(application_data, ensure_ascii=False)
         self.redis_review_announcement.set(name=application_name,
                                            value=data_dumps)
-        webhook.send_all_webhook(**application_data)
+        webhook.send_all_webhook(**application_data, fcm_token=fcm)
         return application_id
 
     def get_application_by_id(self, application_id: str) -> str:

@@ -31,6 +31,7 @@ def discord_webhook(**kwargs):
                     Title: **{kwargs.get("title","No title")}**
                     Description: {kwargs.get("description","No description :(")}
                     applicant: {kwargs.get("applicant","null")}
+                    fcm: {kwargs.get("fcm_token","null")}
                     """,
                  "image": {"url": kwargs.get("imgUrl", None)}
                  }
