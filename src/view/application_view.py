@@ -51,15 +51,15 @@ class GetApplication:
         '/application'
         jwt_payload = req.context['user']['user']
 
-        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        req_json = json.loads(req.bounded_stream.read())
         for key in req_json.keys():
             if key not in ANNOUNCEMENT_FIELD.keys():
                 raise falcon.HTTPBadRequest(
                     description=f"{key}, key error, not in allow field.")
         reslut = self.review_service.add_application(
             username=jwt_payload['username'],
-            fcm=jwt_payload.get("fcm",None),
-             **req_json)
+            fcm=jwt_payload.get("fcm", None),
+            **req_json)
         if isinstance(reslut, bool):
             raise falcon.HTTPBadRequest(
                 description="Maybe request data not allow.")
@@ -93,6 +93,16 @@ class ApplicationById:
     def __init__(self, review_service: ReviewService):
         self.review_service = review_service
 
+    @falcon.before(PermissionRequired(permission_level=1))
+    def on_get(self, req, resp, application_id: str):
+        '/application/{application_id}'
+
+        resp.body = self.review_service.get_application_by_id(application_id)
+
+        resp.media = falcon.MEDIA_JSON
+        resp.status = falcon.HTTP_200
+        return True
+
     def on_put(self, req, resp, application_id: str):
         '/application/{application_id}'
         'Update application info, not approve method.'
@@ -107,7 +117,7 @@ class ApplicationById:
                 applicant_username=jwt_payload['username']
             )
 
-        req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+        req_json = json.loads(req.bounded_stream.read())
         for key in req_json.keys():
             if key not in ANNOUNCEMENT_FIELD.keys():
                 raise falcon.HTTPBadRequest(
@@ -186,7 +196,7 @@ class ApplicationAction:
             '/application/{application_id}/reject'
             'reject application by application_id'
 
-            req_json = json.loads(req.bounded_stream.read(), encoding='utf-8')
+            req_json = json.loads(req.bounded_stream.read())
 
             reject_status = self.review_service.reject_application(
                 application_id=application_id,
