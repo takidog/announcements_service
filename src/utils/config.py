@@ -35,7 +35,7 @@ MAX_TAGS_LIMIT = 20
 CACHE_EXPIRE_SEC = 120
 
 LANGUAGE_TAG = {'zh': ['zh', 'zh-tw', 'zh-hant'], "en": ['en']}
-
+ANNOUNCEMENT_IN_RANDOM_ORDER_SORT = True
 try:
     ADMIN = [i for i in os.environ['ADMIN'].split(';') if i != ""]
 except KeyError:
