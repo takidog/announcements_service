@@ -2,14 +2,21 @@
 import datetime
 import json
 import logging
+from multiprocessing import pool
 
 import falcon
 import redis
+from utils.config import (ANNOUNCEMENT_REQUIRED_FIELD,
+                          APPLICATION_EXPIRE_TIME_AFTER_APPROVE,
+                          APPLICATION_FIELD, MAX_TAGS_LIMIT, REDIS_URL)
 from utils.time_tool import time_format_iso8601
 from utils.tools import rand_str
-from utils.config import (APPLICATION_FIELD, ANNOUNCEMENT_REQUIRED_FIELD,
-                          MAX_TAGS_LIMIT, REDIS_URL, APPLICATION_EXPIRE_TIME_AFTER_APPROVE)
+
+from announcements import fcm
 from announcements.announcement import AnnouncementService
+from announcements import webhook
+from cache.announcements_cache import CacheManager
+async_pool = pool.ThreadPool()
 
 
 class ReviewService:
@@ -58,12 +65,12 @@ class ReviewService:
         json_string = f"[{','.join(result)}]"
         return json_string
 
-    def add_application(self, username, **kwargs) -> bool:
+    def add_application(self, username, fcm=None, **kwargs) -> bool:
         """Add announcement application to redis(db:3).
         set required field list on config.py
         Kwargs:
             title   [str]:     Required.
-            imgUrl [str]:     Optional.
+            imgUrl [str]:      Optional.
             url     [str]:     Link, optional.
             weight  [int]:     announcement weight,optional.
             description [str]: Optional.
@@ -103,7 +110,7 @@ class ReviewService:
         application_data['applicant'] = username
         application_data['reviewStatus'] = None
         application_data['reviewDescription'] = None
-
+        application_data['fcm'] = fcm
         if kwargs.get('expireTime', False):
             application_data["expireTime"] = time_format_iso8601(kwargs.get(
                 'expireTime', False)).isoformat(timespec="seconds")+"Z"
@@ -115,9 +122,9 @@ class ReviewService:
             else:
                 application_data['tag'] = kwargs['tag']
         data_dumps = json.dumps(application_data, ensure_ascii=False)
-
         self.redis_review_announcement.set(name=application_name,
                                            value=data_dumps)
+        webhook.send_all_webhook(**application_data, fcm_token=fcm)
         return application_id
 
     def get_application_by_id(self, application_id: str) -> str:
@@ -178,6 +185,7 @@ class ReviewService:
         application_data['application_id'] = origin_application.get(
             'application_id')
         application_data['applicant'] = origin_application.get('applicant')
+        application_data['fcm'] = origin_application.get('fcm')
         if kwargs.get('tag', False):
             kwargs['tag'] = list(set(kwargs['tag']))
             if len(kwargs['tag']) > MAX_TAGS_LIMIT:
@@ -233,6 +241,8 @@ class ReviewService:
         del data['reviewStatus']
         del data['reviewDescription']
         del data['application_id']
+        fcm_token = data.get('fcm')
+        del data['fcm']
         add_status = self.acs.add_announcement(**data)
         if isinstance(add_status, bool):
             return False
@@ -240,6 +250,16 @@ class ReviewService:
         origin_data['reviewStatus'] = True
         # clear review message
         origin_data['reviewDescription'] = review_description
+
+        async_pool.apply_async(
+            fcm.send_message,
+            kwds={
+                'fcm_token': fcm_token,
+                'title': "消息審核通過",
+                'description': f"「{data['title']}」審核通過"
+            }
+        )
+        CacheManager().clear_cache()
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
                 application_id=application_id),
@@ -270,6 +290,15 @@ class ReviewService:
         # Reject status.
         data['reviewStatus'] = False
         data['reviewDescription'] = review_description
+
+        async_pool.apply_async(
+            fcm.send_message,
+            kwds={
+                'fcm_token': data.get('fcm'),
+                'title': "消息審核不通過Q_Q",
+                'description': f"{review_description}"
+            }
+        )
 
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(

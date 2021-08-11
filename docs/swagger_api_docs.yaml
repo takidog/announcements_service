@@ -5,13 +5,46 @@ info:
   contact: {}
 paths:
   /application/{application_id}:
+    get:
+      security:
+        - api_key: []
+      summary: Get application (Admin or editor required.)
+      tags:
+        - application
+      operationId: Updateapplication(foreditor)
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "application id"
+      deprecated: false
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/application_success"
+        "401":
+          description: auth problem.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+        "404":
+          description: not found application by application_id.
+        "403":
+          description: not owner or editor.
     put:
       security:
         - api_key: []
       summary: Update application (Admin or editor required.)
       tags:
         - application
-      operationId: Updateapplication(foreditor)
       parameters:
         - in: path
           name: application_id
@@ -185,9 +218,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
         "403":
           description: not owner or editor.
 
@@ -205,9 +241,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_application_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_application_data_type"
+
         "403":
           description: not owner or editor.
     post:
@@ -238,6 +278,7 @@ paths:
                 $ref: "#/components/schemas/401_Unauthorized"
         "404":
           description: not found application by application_id.
+
   /login:
     post:
       summary: login
@@ -464,6 +505,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/401_Unauthorized"
+
+  /ban:
+    get:
+      security:
+        - api_key: []
+      summary: get banned list (Admin required)
+      tags:
+        - auth
+      deprecated: false
+      responses:
+        "200":
+          description: "banned list"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      security:
+        - api_key: []
+      summary: banned user (Admin required)
+      tags:
+        - auth
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: "Not content"
+          headers: {}
+        "406":
+          description: "detail see response content, most error are about user status."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401_Unauthorized"
+
   /announcements/add/{id}:
     post:
       security:
@@ -613,9 +699,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_announcement_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_announcement_data_type"
     post:
       summary: get tag by POST
       tags:
@@ -634,9 +723,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/get_announcement_data_type"
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/get_announcement_data_type"
   /announcements/tags:
     get:
       summary: get tag count

@@ -2,7 +2,8 @@ import json
 
 import redis
 from announcements.announcement import AnnouncementService
-from utils.config import CACHE_EXPIRE_SEC, REDIS_URL
+from utils.config import CACHE_EXPIRE_SEC, REDIS_URL, ANNOUNCEMENT_IN_RANDOM_ORDER_SORT
+import random
 
 
 class CacheManager:
@@ -23,6 +24,8 @@ class CacheManager:
         if self.redis_cache.exists(cache_key):
             return json.loads(self.redis_cache.get(cache_key))
         data = self.acs._get_all_announcement()
+        if ANNOUNCEMENT_IN_RANDOM_ORDER_SORT:
+            random.shuffle(data)
         self.redis_cache.set(name=cache_key,
                              value=json.dumps(data),
                              ex=CACHE_EXPIRE_SEC

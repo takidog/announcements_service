@@ -22,17 +22,20 @@ ANNOUNCEMENT_FIELD = {
     "applicant": {"type": str, "allow_user_set": False, "default": None}
 }
 
+APPLICANT_HOSTNAME_LIMIT = []
+
 # copy announcement field because application field have different config.
 APPLICATION_FIELD = ANNOUNCEMENT_FIELD
 del APPLICATION_FIELD['id']
 APPLICATION_FIELD['application_id'] = {
     "type": str, "allow_user_set": False, "default": ""}
-
+APPLICATION_FIELD['fcm'] = {
+    "type": str, "allow_user_set": False, "default": ""}
 MAX_TAGS_LIMIT = 20
 CACHE_EXPIRE_SEC = 120
 
 LANGUAGE_TAG = {'zh': ['zh', 'zh-tw', 'zh-hant'], "en": ['en']}
-
+ANNOUNCEMENT_IN_RANDOM_ORDER_SORT = True
 try:
     ADMIN = [i for i in os.environ['ADMIN'].split(';') if i != ""]
 except KeyError:
@@ -63,7 +66,19 @@ APPLICATION_EXPIRE_TIME_AFTER_APPROVE = 60*60*24*30
 # intended recipient of the client secret.
 # Since the client secret is sent to the validation
 # server, use https://appleid.apple.com.
+APPLE_SIGN_IN_AUD = None
 try:
-    APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD']
+    APPLE_SIGN_IN_AUD = os.environ['APPLE_SIGN_IN_AUD'].split(',')
 except KeyError:
     APPLE_SIGN_IN_AUD = None
+
+FCM_SERVER_TOKEN = None
+try:
+    FCM_SERVER_TOKEN = os.environ['FCM_SERVER_TOKEN']
+except KeyError:
+    FCM_SERVER_TOKEN = None
+DISCORD_WEBHOOK_URL = None
+try:
+    DISCORD_WEBHOOK_URL = os.environ['DISCORD_WEBHOOK_URL']
+except KeyError:
+    DISCORD_WEBHOOK_URL = None
