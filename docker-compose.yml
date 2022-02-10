@@ -25,7 +25,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - ADMIN=${SUPER_ADMIN_LIST}
       - APPLE_SIGN_IN_AUD=${APPLE_SIGN_IN_AUD}
-      - DISCORD_WEBHOOK_URL=${APPLE_SIGN_IN_AUD}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
       - FCM_SERVER_TOKEN=${FCM_SERVER_TOKEN}
     networks:
       - redis-announcements-net
