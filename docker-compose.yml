@@ -1,0 +1,58 @@
+version: "3.6"
+services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx/config.conf:/etc/nginx/conf.d/config.conf
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - open-net
+    depends_on:
+      - certbot
+      - announcements_serice
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+
+  announcements_serice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - ADMIN=${SUPER_ADMIN_LIST}
+      - APPLE_SIGN_IN_AUD=${APPLE_SIGN_IN_AUD}
+      - DISCORD_WEBHOOK_URL=${APPLE_SIGN_IN_AUD}
+      - FCM_SERVER_TOKEN=${FCM_SERVER_TOKEN}
+    networks:
+      - redis-announcements-net
+      - open-net
+    depends_on:
+      - redis_announcement
+
+  redis_announcement:
+    image: "redis:alpine"
+    command: [ "redis-server", "--appendonly", "no" ]
+    networks:
+      - redis-announcements-net
+    volumes:
+      - ./redis_storage:/data
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    container_name: certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+networks:
+  redis-net:
+  open-net:
+  redis-announcements-net:
+volumes:
+  redis-data:
+  redis-announcements-data:
