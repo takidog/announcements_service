@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.7
 # Create app directory
 RUN mkdir -p /usr/src/announcements_service
 WORKDIR /usr/src/announcements_service
