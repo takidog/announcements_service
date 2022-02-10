@@ -9,7 +9,7 @@ from auth.falcon_auth_decorator import PermissionRequired
 class Announcements:
 
     auth = {
-        'exempt_methods': ['GET']
+        'exempt_methods': ['GET', 'POST']
     }
 
     def __init__(self, cache_manager):
