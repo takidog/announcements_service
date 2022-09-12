@@ -16,6 +16,15 @@ def send_all_webhook(**kwargs):
             kwds=kwargs
         )
 
+def discord_message(message:str):
+    if DISCORD_WEBHOOK_URL == None:
+        return False
+    requests.post(
+        url=DISCORD_WEBHOOK_URL,
+        json={
+            "content": message
+        }
+    )
 
 def discord_webhook(**kwargs):
     if DISCORD_WEBHOOK_URL == None:
@@ -23,7 +32,7 @@ def discord_webhook(**kwargs):
     requests.post(
         url=DISCORD_WEBHOOK_URL,
         json={
-            "content": "New application!",
+            "content": f'New application, \n{kwargs.get("application_id","null")}\n {kwargs.get("title","No title")}',
             "embeds": [
                 {"description":
                     f"""

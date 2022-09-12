@@ -259,6 +259,8 @@ class ReviewService:
                 'description': f"「{data['title']}」審核通過"
             }
         )
+        webhook.discord_message(f'通過 - {origin_data.get("title","")}')
+
         CacheManager().clear_cache()
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
@@ -299,6 +301,8 @@ class ReviewService:
                 'description': f"{review_description}"
             }
         )
+
+        webhook.discord_message(f'拒絕 -  {data.get("title","null")} \n原因：{review_description}')
 
         self.redis_review_announcement.set(
             name=self.get_application_key_name_by_id(
