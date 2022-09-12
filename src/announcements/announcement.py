@@ -167,11 +167,10 @@ class AnnouncementService:
         """
         if announcement_id == None:
             raise falcon.HTTPMissingParam("announcement_id")
-        try:
-            announcement_name = self._get_announcement_key_name_by_id(
-                announcement_id)[0]
-        except IndexError:
+        
+        if not self.redis_announcement.exists(f"announcement_{announcement_id}"):
             raise falcon.HTTPNotFound()
+        announcement_name = f"announcement_{announcement_id}"
 
         origin_announcement = json.loads(
             self.redis_announcement.get(announcement_name))
@@ -223,15 +222,12 @@ class AnnouncementService:
         """
         if announcement_id is None:
             raise falcon.HTTPMissingParam("announcement id")
-        try:
-            announcement_name_search = self._get_announcement_key_name_by_id(
-                announcement_id, raise_error=not force_delete)
-        except falcon.HTTPServiceUnavailable as e:
-            falcon.falcon.HTTPServiceUnavailable(
-                title=e.title, description="Add force delete to dismiss this error, and delete same id announcements.")
 
-        for name in announcement_name_search:
-            self.redis_announcement.delete(name)
+        if not self.redis_announcement.exists(f"announcement_{announcement_id}"):
+            raise falcon.HTTPNotFound()
+        announcement_name = f"announcement_{announcement_id}"
+
+        self.redis_announcement.delete(announcement_name)
 
         return True
 
