@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.11
 # Create app directory
 RUN mkdir -p /usr/src/announcements_service
 WORKDIR /usr/src/announcements_service
